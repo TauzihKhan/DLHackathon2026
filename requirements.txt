@@ -1,8 +1,8 @@
-fastapi
-uvicorn
-httpx
-openai
-python-dotenv
-pandas
-scikit-learn
-sqlalchemy
+fastapi~=0.134
+uvicorn~=0.41
+httpx~=0.28
+openai~=2.24
+python-dotenv~=1.2
+pandas~=3.0
+scikit-learn~=1.8
+sqlalchemy~=2.0
