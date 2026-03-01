@@ -1,14 +1,18 @@
 # DLHackathon2026
-idk hopefully something by morning
 
-Test Change
-Another Change
+Hackathon project repository for building and demoing an end-to-end product quickly.
 
-One more change
+## Start Here
+- Project context: `CONTEXT.md`
+- Agent workflow rules: `AGENTS.md`
 
-lets do this
+## Team Goal
+Ship a reliable demo before the deadline with clear scope and fast iteration.
 
-Another change
+## Current Status
+Initial project scaffold. Stack and feature slices are being defined.
 
-Anotherrr change
-test
+## Next Steps
+- Agree on stack and folder structure
+- Define first end-to-end feature slice
+- Add run/build/test commands
