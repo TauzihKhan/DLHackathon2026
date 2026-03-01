@@ -1,6 +1,6 @@
 # Project Structure Guide
 
-This document explains the agreed backend-first scaffold for the hackathon problem:
+This document explains the lean, demo-first scaffold for the hackathon problem:
 model a learner's changing state over time and generate clear, actionable guidance.
 
 ## Folder Tree
@@ -10,69 +10,35 @@ model a learner's changing state over time and generate clear, actionable guidan
 ├─ app/
 │  ├─ __init__.py
 │  ├─ main.py
-│  ├─ core/
-│  │  ├─ config.py
-│  │  ├─ logging.py
-│  │  └─ security.py
 │  ├─ api/
 │  │  ├─ __init__.py
-│  │  ├─ deps.py
 │  │  └─ routers/
 │  │     ├─ health.py
-│  │     ├─ ingest.py
-│  │     ├─ learners.py
-│  │     ├─ guidance.py
-│  │     └─ admin.py
+│  │     ├─ events.py
+│  │     ├─ students.py
+│  │     └─ insights.py
+│  ├─ core/
+│  │  ├─ config.py
+│  │  └─ logging.py
 │  ├─ schemas/
 │  │  ├─ event.py
 │  │  ├─ state.py
-│  │  ├─ guidance.py
-│  │  └─ common.py
-│  ├─ domain/
+│  │  └─ insight.py
+│  ├─ engine/
 │  │  ├─ state_engine.py
-│  │  ├─ decay.py
-│  │  ├─ mastery.py
-│  │  ├─ features.py
+│  │  ├─ explain.py
 │  │  ├─ policy.py
-│  │  └─ explain.py
-│  ├─ services/
-│  │  ├─ __init__.py
-│  │  ├─ guidance_service.py
-│  │  ├─ llm_service.py
-│  │  └─ simulation_service.py
-│  ├─ repositories/
-│  │  ├─ __init__.py
-│  │  ├─ events_repo.py
-│  │  ├─ state_repo.py
-│  │  └─ guidance_repo.py
-│  ├─ db/
-│  │  ├─ __init__.py
-│  │  ├─ session.py
-│  │  ├─ models.py
-│  │  └─ migrations/
-│  ├─ jobs/
-│  │  ├─ decay_scheduler.py
-│  │  └─ recompute_snapshots.py
-│  ├─ eval/
-│  │  ├─ __init__.py
-│  │  ├─ offline_metrics.py
-│  │  └─ scenarios.py
-│  └─ tests/
-│     ├─ test_state_engine.py
-│     ├─ test_decay.py
-│     ├─ test_policy.py
-│     └─ test_guidance_api.py
+│  │  └─ decay.py
+│  └─ store/
+│     └─ memory.py
 ├─ scripts/
 │  ├─ seed_demo_data.py
-│  ├─ replay_events.py
 │  └─ run_dev.sh
-├─ data/
-│  ├─ sample_events.jsonl
-│  └─ demo_learners.json
+├─ tests/
+│  ├─ test_state_engine.py
+│  └─ test_insights.py
 └─ docs/
-   ├─ PROJECT_STRUCTURE.md
-   ├─ demo_story.md
-   └─ api_contract.md
+   └─ PROJECT_STRUCTURE.md
 ```
 
 ## Why Each Part Exists
@@ -80,52 +46,36 @@ model a learner's changing state over time and generate clear, actionable guidan
 - `app/main.py`
   Single FastAPI entrypoint so everyone runs the app the same way.
 
-- `app/core/`
-  Shared runtime setup (settings, logging, security) to avoid config logic spreading across features.
-
 - `app/api/`
-  HTTP layer only. Keeps request/response handling separate from learning logic.
+  HTTP layer only. Contains endpoints for health, event ingest, state, and insights.
+
+- `app/core/`
+  Shared runtime setup (settings, logging) to avoid config logic spreading across features.
 
 - `app/schemas/`
-  Canonical payload contracts for events, learner state, and guidance outputs.
+  Canonical payload contracts for events, learner state, and insight outputs.
 
-- `app/domain/`
+- `app/engine/`
   Core intelligence. This is where learner state is updated, decay is applied, and next actions are chosen.
 
-- `app/services/`
-  Orchestration layer that combines domain logic, repositories, and optional LLM explanation generation.
-
-- `app/repositories/`
-  Data access methods grouped by aggregate, so DB logic stays out of API and domain modules.
-
-- `app/db/`
-  Database connection/session + ORM models + migration folder.
-
-- `app/jobs/`
-  Background or scheduled processes, especially periodic decay/recompute flows.
-
-- `app/eval/`
-  Offline checks for recommendation quality and deterministic scenarios for demo confidence.
-
-- `app/tests/`
-  Focused tests for state updates, decay behavior, policy outputs, and API behavior.
+- `app/store/`
+  Lightweight persistence abstraction. Start with in-memory storage for predictable demo speed.
 
 - `scripts/`
-  Developer and demo helpers (seed data, replay events, run app quickly).
+  Developer and demo helpers (seed data and quick local run scripts).
 
-- `data/`
-  Stable demo fixtures so all teammates can reproduce the same outputs.
+- `tests/`
+  Critical checks for core state updates and insight behavior.
 
 - `docs/`
-  Shared product and technical references for judges/demo prep and team alignment.
+  Shared structure and ownership reference for team alignment.
 
 ## Practical Team Rule
 
 When adding a new feature, place code by responsibility:
 - HTTP concern -> `api/`
-- Learning logic -> `domain/`
-- Multi-step flow -> `services/`
-- DB query/write -> `repositories/`
-- Batch/scheduled task -> `jobs/`
+- Learning logic -> `engine/`
+- Short-term persistence -> `store/`
+- Shared app settings/logging -> `core/`
 
 This keeps ownership clear and avoids mixing concerns under deadline pressure.
