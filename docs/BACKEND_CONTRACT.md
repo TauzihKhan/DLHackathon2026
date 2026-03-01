@@ -90,6 +90,29 @@ Exact formulas can evolve, but ranges and meaning above cannot change without ag
 ### Shared file rule
 - `app/schemas/event.py` is shared; changes require sync in both branches.
 
+## Current Build Status (As of 2026-03-01)
+
+Completed in `backend-1` (Role 1.1):
+- `app/schemas/event.py`
+- `app/schemas/state.py`
+- `app/schemas/insight.py`
+- `app/engine/decay.py`
+- `app/engine/state_engine.py`
+- `app/engine/policy.py`
+- `app/engine/explain.py`
+
+Role 1.1 remaining:
+- none for core v0 contracts
+
+Role 1.2 start point (safe to begin now):
+- `app/store/memory.py` using `StudentStateResponse` keyed by `learner_id`
+- `app/api/routers/events.py` calling `update_state(...)`
+- `app/api/routers/students.py` calling `apply_inactivity_decay(...)`
+- `app/api/routers/insights.py` consuming `generate_policy(...)` + `build_insight_response(...)`
+- `app/main.py` router registration
+
+Important: Role 1.2 should not change learning formulas in `app/engine/*`; treat engine outputs as source of truth.
+
 ## Non-Breaking Change Rules
 - Do not rename existing JSON keys once used by frontend.
 - Additive changes are allowed (new optional fields).
@@ -113,3 +136,10 @@ Use this at the top of each Codex session:
 
 "Read `README.md`, `CONTEXT.md`, `docs/ROLES.md`, and `docs/BACKEND_CONTRACT.md`.
 I am working on Role 1.x. Follow the locked contracts and do not rename API keys."
+
+## Codex Session Bootstrap Prompt (Role 1.2 specific)
+Use this for partner sessions:
+
+"Read `README.md`, `CONTEXT.md`, `docs/ROLES.md`, and `docs/BACKEND_CONTRACT.md`.
+Implement only Role 1.2 files (`api`, `store`, `main` wiring).
+Do not modify formulas in `app/engine/*`. Use existing schemas and locked response keys."
