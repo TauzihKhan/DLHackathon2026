@@ -19,8 +19,9 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 
 ## Current Repo State
 - Demo-first scaffold is set and documented in `docs/PROJECT_STRUCTURE.md`.
-- FastAPI-oriented boundaries are intentionally lean to maximize speed-to-demo.
+- Full-stack boundaries are intentionally lean to maximize speed-to-demo.
 - Folder skeleton currently exists for:
+  - `frontend/src` (pages, components, services, styles) and `frontend/public`
   - `app/api/routers`, `app/core`, `app/schemas`, `app/engine`, `app/store`
   - `tests`, `scripts`, `docs`
 - Existing package markers:
@@ -36,8 +37,8 @@ We are building an AI-powered learning-state engine that:
 - adapts recommendations for inactivity and accelerated progress.
 
 ## Locked Decisions (As of Now)
-- Stack direction: Python + FastAPI backend-first demo.
-- Architecture direction: minimal layered structure (`api` -> `engine` -> `store`) for rapid iteration.
+- Stack direction: web frontend + Python FastAPI backend.
+- Architecture direction: `frontend` (UI) + minimal backend layering (`api` -> `engine` -> `store`) for rapid iteration.
 - Delivery strategy: ship one thin end-to-end flow first, then add depth only if time permits.
 - Documentation references:
   - structure and ownership: `docs/PROJECT_STRUCTURE.md`
@@ -70,6 +71,7 @@ We are building an AI-powered learning-state engine that:
 - `GET /health`: service health for demos/checks
 
 ## Proposed Baseline Architecture
+- `frontend/`: web UI (screens, components, API clients)
 - `app/`: API routes, schemas, core engine, and lightweight store
 - `tests/`: critical-flow tests only
 - `scripts/`: seed/replay/dev helpers

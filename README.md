@@ -11,9 +11,11 @@ Hackathon project repository for building and demoing an end-to-end product quic
 Ship a reliable demo before the deadline with clear scope and fast iteration.
 
 ## Current Status
-Lean FastAPI MVP scaffold is in place for learner-state modeling and guidance APIs.
+Lean full-stack MVP scaffold is in place: web UI in `frontend/` and learner-state APIs in `app/`.
 
 ## Demo-First Structure
+- `frontend/`
+  - Web client app (pages, components, API calls, UI styling).
 - `app/main.py`
   - FastAPI app entrypoint and router registration.
 - `app/api/routers/`

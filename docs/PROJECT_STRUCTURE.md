@@ -7,6 +7,14 @@ model a learner's changing state over time and generate clear, actionable guidan
 
 ```text
 .
+├─ frontend/
+│  ├─ public/
+│  └─ src/
+│     ├─ pages/
+│     ├─ components/
+│     ├─ services/
+│     ├─ lib/
+│     └─ styles/
 ├─ app/
 │  ├─ __init__.py
 │  ├─ main.py
@@ -43,6 +51,9 @@ model a learner's changing state over time and generate clear, actionable guidan
 
 ## Why Each Part Exists
 
+- `frontend/`
+  Web UI application. Owns layout, interaction flows, and API consumption for the live demo.
+
 - `app/main.py`
   Single FastAPI entrypoint so everyone runs the app the same way.
 
@@ -73,6 +84,7 @@ model a learner's changing state over time and generate clear, actionable guidan
 ## Practical Team Rule
 
 When adding a new feature, place code by responsibility:
+- UI, pages, component behavior -> `frontend/`
 - HTTP concern -> `api/`
 - Learning logic -> `engine/`
 - Short-term persistence -> `store/`
