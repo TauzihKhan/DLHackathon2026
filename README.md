@@ -5,14 +5,14 @@ Hackathon project repository for building and demoing an end-to-end product quic
 ## Start Here
 - Project context: `CONTEXT.md`
 - Agent workflow rules: `AGENTS.md`
+- Structure guide: `docs/PROJECT_STRUCTURE.md`
 
 ## Team Goal
 Ship a reliable demo before the deadline with clear scope and fast iteration.
 
 ## Current Status
-Initial project scaffold. Stack and feature slices are being defined.
+Backend-first scaffold is defined for learner-state modeling and guidance APIs.
 
 ## Next Steps
-- Agree on stack and folder structure
-- Define first end-to-end feature slice
+- Implement first end-to-end slice: `POST /events` -> state update -> `GET /guidance`
 - Add run/build/test commands

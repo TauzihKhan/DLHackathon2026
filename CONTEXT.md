@@ -18,14 +18,17 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 - Every significant change should update this file if assumptions change.
 
 ## Current Repo State
-- Minimal scaffold is currently present.
-- Architecture and stack choices are still open.
+- Backend-first scaffold is set and documented in `docs/PROJECT_STRUCTURE.md`.
+- FastAPI-oriented module boundaries are chosen to optimize speed-to-demo.
 
 ## Proposed Baseline Architecture
-- `frontend/`: UI app
-- `backend/`: API/server
-- `shared/`: shared types/contracts
-- `docs/`: deeper design/decision docs
+- `app/`: API, domain logic, services, DB, jobs, evaluation, and tests
+- `scripts/`: seed/replay/dev helpers
+- `data/`: demo fixtures
+- `docs/`: product and technical references
+
+Reference structure and ownership rules:
+- `docs/PROJECT_STRUCTURE.md`
 
 ## Environment Setup (To Update As You Decide Stack)
 - Install dependencies
@@ -58,7 +61,6 @@ Template:
 
 ## Open Questions
 - What is the exact demo narrative?
-- What stack are we standardizing on?
 - What are must-have vs nice-to-have features?
 - What should be mocked vs fully implemented?
 
@@ -71,4 +73,3 @@ Template:
 - Confirm top 1-2 priorities for next session.
 - Ensure main/demo branch is runnable.
 - Capture new decisions in this file.
-
