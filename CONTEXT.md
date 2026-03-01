@@ -20,6 +20,7 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 ## Current Repo State
 - Demo-first scaffold is set and documented in `docs/PROJECT_STRUCTURE.md`.
 - Full-stack boundaries are intentionally lean to maximize speed-to-demo.
+- Backend parallel-work contract is documented in `docs/BACKEND_CONTRACT.md` for Role 1.1 and Role 1.2 alignment.
 - Folder skeleton currently exists for:
   - `frontend/src` (pages, components, services, styles) and `frontend/public`
   - `app/api/routers`, `app/core`, `app/schemas`, `app/engine`, `app/store`
@@ -42,6 +43,7 @@ We are building an AI-powered learning-state engine that:
 - Delivery strategy: ship one thin end-to-end flow first, then add depth only if time permits.
 - Documentation references:
   - structure and ownership: `docs/PROJECT_STRUCTURE.md`
+  - backend parallel contract: `docs/BACKEND_CONTRACT.md`
   - project-level summary: `README.md`
   - decision log/current state: `CONTEXT.md`
 
