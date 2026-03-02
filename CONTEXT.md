@@ -41,6 +41,9 @@ We are building an AI-powered learning-state engine that:
 - Stack direction: web frontend + Python FastAPI backend.
 - Architecture direction: `frontend` (UI) + minimal backend layering (`api` -> `engine` -> `store`) for rapid iteration.
 - Delivery strategy: ship one thin end-to-end flow first, then add depth only if time permits.
+- Role 3 implementation direction: narrative generation is grounded on Role 1 structured outputs only
+  (`reason_codes`, `weak_subtopics`, `priority_subtopic_id`, `explanation_facts`).
+- Reliability requirement: Role 3 endpoint must degrade to deterministic fallback text/questions if LLM call fails.
 - Documentation references:
   - structure and ownership: `docs/PROJECT_STRUCTURE.md`
   - backend parallel contract: `docs/BACKEND_CONTRACT.md`
@@ -71,6 +74,7 @@ We are building an AI-powered learning-state engine that:
 - `GET /students/{id}/state`: return current learner state snapshot
 - `GET /students/{id}/insights`: return top actionable recommendation + explanation
 - `GET /health`: service health for demos/checks
+- `GET /students/{id}/insights/narrative`: Role 3 natural-language explanation + targeted practice questions
 
 ## Proposed Baseline Architecture
 - `frontend/`: web UI (screens, components, API clients)

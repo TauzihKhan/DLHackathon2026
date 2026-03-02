@@ -13,6 +13,7 @@ Ship a reliable demo before the deadline with clear scope and fast iteration.
 
 ## Current Status
 Lean full-stack MVP scaffold is in place: web UI in `frontend/` and learner-state APIs in `app/`.
+Role 3 narrative endpoint is now available on top of deterministic insights.
 
 ## Demo-First Structure
 - `frontend/`
@@ -39,3 +40,22 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
 ## Next Steps
 - Implement first end-to-end slice: `POST /events` -> state update -> `GET /students/{id}/insights`
 - Add run/build/test commands
+
+## Role 3 Narrative Layer (AI Explainer)
+- New endpoint: `GET /students/{id}/insights/narrative`
+- Input source: existing deterministic insight payload (`policy` + `explanation_facts`)
+- Output: natural-language summary/explanation + targeted practice questions
+- Reliability rule: if LLM is disabled or fails, endpoint returns deterministic fallback narrative
+
+Backend contract reference:
+- Full request/response lock: `docs/BACKEND_CONTRACT.md`
+- Folder responsibilities: `docs/PROJECT_STRUCTURE.md`
+
+Environment variables:
+- `ROLE3_AI_ENABLED` (default: `true`)
+- `OPENAI_API_KEY` (required for live LLM generation)
+- `OPENAI_MODEL` (default: `gpt-4.1-mini`)
+- `OPENAI_TIMEOUT_SECONDS` (default: `12`)
+- `ROLE3_AI_TEMPERATURE` (default: `0.2`)
+- `ROLE3_MAX_OUTPUT_TOKENS` (default: `600`)
+- `ROLE3_PRACTICE_QUESTION_COUNT` (default: `3`)
