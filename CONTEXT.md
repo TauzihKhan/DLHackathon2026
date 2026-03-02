@@ -24,8 +24,9 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 - Frontend now has a working Role 2 dashboard slice in `frontend/`:
   - `index.html`, `login.html`, `register.html`, `auth.js`, `styles.css`, `app.js`
   - separate login and register pages before dashboard access
-  - email verification step with backend hook + demo fallback
-  - visualized mastery bars, weak topics list, and recommendation panel
+  - register flow includes email verification (backend hook + demo fallback); login is verification-free
+  - registration auto-generates a `new_student_*` ID and stores it in session
+  - dashboard now includes tabs: Dashboard, Statistics, Assignments, Tests & Scores
   - API integration path to `GET /students/{id}/state` and `GET /students/{id}/insights`
   - deterministic mock fallback when backend endpoints are unavailable
 - Backend feature files are still pending for:
@@ -76,6 +77,14 @@ We are building an AI-powered learning-state engine that:
 - `GET /students/{id}/state`: return current learner state snapshot
 - `GET /students/{id}/insights`: return top actionable recommendation + explanation
 - `GET /health`: service health for demos/checks
+
+## Frontend-Driven Backend Hooks (Role 2 Request)
+- `POST /auth/send-verification`: send email verification code for register flow.
+- `GET /students/{id}/statistics/study-time`: tab data for statistics.
+- `GET /students/{id}/statistics/topic-accuracy`: topic trend data for statistics.
+- `GET /students/{id}/assignments?status=pending|done`: assignment tabs.
+- `GET /students/{id}/tests`: recent test list.
+- `GET /students/{id}/tests/summary`: aggregate score breakdown.
 
 ## Proposed Baseline Architecture
 - `frontend/`: web UI (screens, components, API clients)

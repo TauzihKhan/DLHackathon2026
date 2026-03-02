@@ -57,9 +57,17 @@ If backend is unavailable, it falls back to deterministic mock data for demo con
 
 Frontend auth flow (demo mode):
 - Users must login/register before accessing dashboard.
-- Login and register are now separate pages:
+- Login and register are separate pages:
   - `http://localhost:5500/login.html`
   - `http://localhost:5500/register.html`
-- Register captures name, email, DOB, password.
+- Register captures name, email, DOB, password and auto-generates `new_student_*` ID.
+- Email verification is handled on register flow only.
 - Verification tries backend endpoint `POST /auth/send-verification`; if unavailable, it falls back to demo code in UI.
 - User records are stored in browser local storage for demo only.
+
+Frontend tabs (UI shell ready):
+- Dashboard
+- Statistics
+- Assignments
+- Tests & Scores
+- Statistics/Assignments/Tests tabs currently use placeholder cards and expected backend endpoint notes.

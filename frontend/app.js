@@ -15,7 +15,9 @@ const nodes = {
   masteryChart: document.getElementById('masteryChart'),
   weakTopicsList: document.getElementById('weakTopicsList'),
   recommendation: document.getElementById('recommendation'),
-  sourceNote: document.getElementById('sourceNote')
+  sourceNote: document.getElementById('sourceNote'),
+  pageTabs: Array.from(document.querySelectorAll('.page-tab')),
+  tabPanels: Array.from(document.querySelectorAll('.tab-panel'))
 };
 
 const mockState = {
@@ -50,17 +52,33 @@ function authGuard() {
   const session = getCurrentSession();
   if (!session?.email) {
     window.location.href = 'login.html';
-    return false;
+    return null;
   }
 
   const user = getUsers().find((item) => item.email === session.email && item.verified);
   if (!user) {
     clearSession();
     window.location.href = 'login.html';
-    return false;
+    return null;
   }
 
-  return true;
+  return user;
+}
+
+function switchTab(tabKey) {
+  nodes.pageTabs.forEach((button) => {
+    button.classList.toggle('active', button.dataset.tab === tabKey);
+  });
+
+  nodes.tabPanels.forEach((panel) => {
+    panel.classList.toggle('hidden', panel.dataset.panel !== tabKey);
+  });
+}
+
+function setupTabs() {
+  nodes.pageTabs.forEach((button) => {
+    button.addEventListener('click', () => switchTab(button.dataset.tab));
+  });
 }
 
 async function fetchJson(url) {
@@ -129,6 +147,10 @@ nodes.studentId.addEventListener('keydown', (ev) => {
   if (ev.key === 'Enter') loadDashboard();
 });
 
-if (authGuard()) {
+const user = authGuard();
+if (user) {
+  nodes.studentId.value = user.studentId || 'student-001';
+  setupTabs();
+  switchTab('dashboard');
   loadDashboard();
 }

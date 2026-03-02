@@ -25,8 +25,11 @@ function saveUsers(users) {
   window.localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
 }
 
-function setSession(email) {
-  window.localStorage.setItem(STORAGE_KEYS.session, JSON.stringify({ email }));
+function setSession(user) {
+  window.localStorage.setItem(
+    STORAGE_KEYS.session,
+    JSON.stringify({ email: user.email, studentId: user.studentId })
+  );
 }
 
 function getCurrentSession() {
@@ -41,6 +44,17 @@ function setMessage(text, type = 'ok') {
 
 function generateCode() {
   return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+function getNextStudentId(users) {
+  const maxSeen = users.reduce((max, user) => {
+    const match = String(user.studentId || '').match(/^new_student_(\d+)$/);
+    if (!match) return max;
+    return Math.max(max, Number(match[1]));
+  }, 0);
+
+  const nextNumber = String(maxSeen + 1).padStart(3, '0');
+  return `new_student_${nextNumber}`;
 }
 
 async function sendVerificationEmail(email, code) {
@@ -59,7 +73,6 @@ async function sendVerificationEmail(email, code) {
 }
 
 function showVerifyForm(email, code, mode) {
-  if (nodes.loginForm) nodes.loginForm.classList.add('hidden');
   if (nodes.registerForm) nodes.registerForm.classList.add('hidden');
   if (nodes.verifyForm) nodes.verifyForm.classList.remove('hidden');
 
@@ -68,11 +81,10 @@ function showVerifyForm(email, code, mode) {
   }
 
   if (nodes.verifyMode) {
-    if (mode === 'real') {
-      nodes.verifyMode.textContent = 'Email sent via backend verification service.';
-    } else {
-      nodes.verifyMode.textContent = `Demo mode active: use code ${code}.`;
-    }
+    nodes.verifyMode.textContent =
+      mode === 'real'
+        ? 'Email sent via backend verification service.'
+        : `Demo mode active: use code ${code}.`;
   }
 
   setMessage('Enter the verification code to continue.', 'ok');
@@ -122,7 +134,16 @@ if (nodes.registerForm) {
       return;
     }
 
-    const newUser = { name, email, dob, password, verified: false, verificationCode: '' };
+    const newUser = {
+      name,
+      email,
+      dob,
+      password,
+      studentId: getNextStudentId(users),
+      verified: false,
+      verificationCode: ''
+    };
+
     users.push(newUser);
     saveUsers(users);
 
@@ -131,7 +152,7 @@ if (nodes.registerForm) {
 }
 
 if (nodes.loginForm) {
-  nodes.loginForm.addEventListener('submit', async (ev) => {
+  nodes.loginForm.addEventListener('submit', (ev) => {
     ev.preventDefault();
 
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -146,11 +167,11 @@ if (nodes.loginForm) {
     }
 
     if (!user.verified) {
-      await beginVerification(user);
+      setMessage('Please verify this account from Register page first.', 'error');
       return;
     }
 
-    setSession(user.email);
+    setSession(user);
     redirectToDashboard();
   });
 }
@@ -164,9 +185,6 @@ if (nodes.verifyForm) {
 
     if (!email) {
       setMessage('No pending verification. Please register again.', 'error');
-      if (pageMode === 'login') {
-        window.location.href = 'register.html';
-      }
       return;
     }
 
@@ -183,9 +201,22 @@ if (nodes.verifyForm) {
     saveUsers(users);
     window.localStorage.removeItem(STORAGE_KEYS.pendingVerify);
 
-    setSession(user.email);
+    setSession(user);
     redirectToDashboard();
   });
+}
+
+if (pageMode === 'register' && window.localStorage.getItem(STORAGE_KEYS.pendingVerify)) {
+  const email = window.localStorage.getItem(STORAGE_KEYS.pendingVerify);
+  const user = getUsers().find((item) => item.email === email && !item.verified);
+  if (user && nodes.registerForm) {
+    nodes.registerForm.classList.add('hidden');
+    nodes.verifyForm.classList.remove('hidden');
+    nodes.verifyHint.textContent = `Complete verification for ${user.email}.`;
+    nodes.verifyMode.textContent = user.verificationCode
+      ? `Demo mode active: use code ${user.verificationCode}.`
+      : '';
+  }
 }
 
 bootGuard();

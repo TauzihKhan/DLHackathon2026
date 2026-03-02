@@ -122,7 +122,8 @@ h2 {
 
 .primary-btn,
 .logout-btn,
-.controls button {
+.controls button,
+.page-tab {
   border: none;
   border-radius: 999px;
   cursor: pointer;
@@ -219,6 +220,30 @@ h2 {
   background: #e5e8df;
   color: var(--ink);
   border: 1px solid var(--border);
+}
+
+.page-tabs {
+  max-width: 1050px;
+  margin: 0 auto 1rem;
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.page-tab {
+  background: #e8ece5;
+  color: var(--ink);
+  padding: 0.44rem 0.95rem;
+  font-weight: 600;
+}
+
+.page-tab.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.tab-panel {
+  animation: rise 240ms ease both;
 }
 
 .layout {

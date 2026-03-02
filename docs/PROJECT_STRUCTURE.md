@@ -8,9 +8,12 @@ model a learner's changing state over time and generate clear, actionable guidan
 ```text
 .
 ├─ frontend/
+│  ├─ login.html
+│  ├─ register.html
 │  ├─ index.html
-│  ├─ styles.css
-│  └─ app.js
+│  ├─ auth.js
+│  ├─ app.js
+│  └─ styles.css
 ├─ app/
 │  ├─ __init__.py
 │  ├─ main.py
@@ -49,7 +52,7 @@ model a learner's changing state over time and generate clear, actionable guidan
 
 - `frontend/`
   Web UI application. Owns layout, interaction flows, and API consumption for the live demo.
-  Current MVP is a static dashboard page with API fetch + mock fallback.
+  Current MVP has separate login/register pages, auto-generated student IDs, and a multi-tab dashboard shell with API fetch + mock fallback.
 
 - `app/main.py`
   Single FastAPI entrypoint so everyone runs the app the same way.
