@@ -1,6 +1,7 @@
 from __future__ import annotations
 import math
 from datetime import datetime
+from typing import Optional
 from app.engine.decay import apply_decay_to_mastery, compute_decay_risk_score
 from app.schemas.event import LearningEvent
 from app.schemas.state import StudentStateResponse, SubtopicState
@@ -68,7 +69,7 @@ def _updated_confidence(prev_confidence: float, attempts: int) -> float:
 
 def update_state(
     event: LearningEvent,
-    prev_state: StudentStateResponse | None,
+    prev_state: Optional[StudentStateResponse],
 ) -> StudentStateResponse:
     """Apply one event to learner state and return a new snapshot."""
 

@@ -3,70 +3,313 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learner State Dashboard</title>
+    <title>NOVA | Learner Intelligence Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="bg-shape bg-shape-1"></div>
     <div class="bg-shape bg-shape-2"></div>
 
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Role 2 UI Demo</p>
-        <h1>Learner Intelligence Dashboard</h1>
+    <div id="entrySplash" class="entry-splash">
+      <div class="entry-card">
+        <div class="brand-lockup">
+          <p class="eyebrow brand-wordmark">NOVA</p>
+          <p class="brand-tagline">Your AI Learning Hub</p>
+        </div>
+        <h2>Preparing Your Dashboard</h2>
+        <div class="entry-spinner" aria-hidden="true"></div>
       </div>
-      <div class="controls">
-        <label for="studentId">Student ID</label>
-        <input id="studentId" value="student-001" />
-        <button id="refreshBtn">Refresh</button>
+    </div>
+
+    <div id="dashboardApp" class="dashboard-app dashboard-hidden">
+      <header class="topbar">
+        <div>
+          <h1 class="dashboard-brand-title">NOVA</h1>
+          <p class="dashboard-brand-subtitle">Your AI Learning Hub</p>
+        </div>
+        <div class="controls-wrap">
+          <div class="status-strip">
+            <span id="lastUpdated" class="last-updated">Last updated: --:--:--</span>
+            <span id="statusChip" class="status-chip status-track">On track</span>
+          </div>
+          <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
+        </div>
+      </header>
+
+      <nav class="page-tabs">
+        <button class="page-tab active" data-tab="dashboard" type="button">Dashboard</button>
+        <button class="page-tab" data-tab="statistics" type="button">Statistics</button>
+        <button class="page-tab" data-tab="assignments" type="button">Assignments</button>
+        <button class="page-tab" data-tab="tests" type="button">Tests &amp; Scores</button>
+        <button class="page-tab" data-tab="calendar" type="button">Calendar</button>
+        <button class="page-tab" data-tab="profile" type="button">Profile</button>
+      </nav>
+
+      <main>
+        <section class="tab-panel" data-panel="dashboard">
+          <div class="layout">
+            <section class="card summary-card span-8">
+              <h2>Overall Progress</h2>
+              <div class="summary-grid">
+                <article>
+                  <p class="metric-label">Total XP</p>
+                  <p id="xpValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Mastered Topics</p>
+                  <p id="masteredValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">At-Risk Topics</p>
+                  <p id="riskValue" class="metric-value danger">-</p>
+                </article>
+              </div>
+            </section>
+
+            <section class="card span-4">
+              <h2>Study Streak</h2>
+              <p id="streakCurrent" class="metric-value">0 days</p>
+              <p id="streakLongest" class="muted">Longest streak: 0 days</p>
+            </section>
+
+            <section class="card span-8">
+              <h2>Mastery Trend Over Time</h2>
+              <div class="chart-wrap">
+                <canvas id="masteryTrendChart"></canvas>
+              </div>
+            </section>
+
+            <section class="card span-4">
+              <h2>Topic Risk Distribution</h2>
+              <div class="chart-wrap chart-wrap-donut">
+                <canvas id="riskDonutChart"></canvas>
+              </div>
+            </section>
+
+            <section class="card full-width">
+              <h2>Topic Comparison</h2>
+              <div class="chart-wrap chart-wrap-mini">
+                <canvas id="topicComparisonChart"></canvas>
+              </div>
+            </section>
+
+            <section class="card">
+              <h2>Weak or Decaying Topics</h2>
+              <ul id="weakTopicsList" class="list"></ul>
+            </section>
+
+            <section id="recommendationCard" class="card recommendation-tall">
+              <h2>Next Recommendation</h2>
+              <div id="recommendation" class="recommendation">
+                <p id="recommendationText"><strong>No recommendation yet.</strong></p>
+                <p id="recommendationEvidence" class="evidence-line">Evidence: waiting for learner data.</p>
+                <div class="recommendation-actions">
+                  <button id="startPracticeBtn" class="secondary-btn" type="button">Start Practice</button>
+                </div>
+                <div id="practicePanel" class="practice-panel hidden">
+                  Practice set coming soon. We will use your weakest topic to generate targeted questions.
+                </div>
+                <details class="why-panel">
+                  <summary>Why this?</summary>
+                  <ul id="whyList" class="list"></ul>
+                </details>
+                <div class="yt-search">
+                  <input id="youtubeQuery" type="text" />
+                  <button id="youtubeSearchBtn" class="secondary-btn" type="button">Search YouTube</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card">
+              <h2>Focus Plan for Today</h2>
+              <div id="focusPlan" class="checklist"></div>
+            </section>
+
+            <section class="card full-width">
+              <h2>Mastery by Topic</h2>
+              <div id="masteryChart" class="bars"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="statistics">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Statistics</h2>
+              <div class="stats-table-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Topic</th>
+                      <th>Mastery</th>
+                      <th>Last activity</th>
+                      <th>Risk label</th>
+                    </tr>
+                  </thead>
+                  <tbody id="statsTableBody">
+                    <tr>
+                      <td colspan="4" class="muted">No topic data yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="statisticsMeta" class="muted sync-note">Loading statistics sync...</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="assignments">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Assignments</h2>
+              <div class="stats-table-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>Attempts</th>
+                      <th>Accuracy</th>
+                      <th>Due</th>
+                    </tr>
+                  </thead>
+                  <tbody id="assignmentsTableBody">
+                    <tr>
+                      <td colspan="5" class="muted">No assignment data yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="assignmentsMeta" class="muted sync-note">Loading assignment sync...</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="tests">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Tests &amp; Scores</h2>
+              <div class="summary-grid summary-grid-4">
+                <article>
+                  <p class="metric-label">Total tests</p>
+                  <p id="testsTotalValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Average score</p>
+                  <p id="testsAverageValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Best score</p>
+                  <p id="testsBestValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Weakest topic</p>
+                  <p id="testsWeakestValue" class="metric-value metric-value-small">-</p>
+                </article>
+              </div>
+              <div class="stats-table-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Test</th>
+                      <th>Date</th>
+                      <th>Score</th>
+                      <th>Attempts</th>
+                      <th>Topics</th>
+                    </tr>
+                  </thead>
+                  <tbody id="testsTableBody">
+                    <tr>
+                      <td colspan="5" class="muted">No test records yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="testsMeta" class="muted sync-note">Loading tests sync...</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="profile">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Profile</h2>
+              <p class="muted">Your account information and learner activity summary.</p>
+            </section>
+            <section class="card">
+              <h2>Account</h2>
+              <p class="metric-label">Name</p>
+              <p id="profileName" class="profile-value">-</p>
+              <p class="metric-label">Student ID</p>
+              <p id="profileStudentId" class="profile-value">-</p>
+              <p class="metric-label">Email</p>
+              <p id="profileEmail" class="profile-value">-</p>
+              <p class="metric-label">Date of Birth</p>
+              <p id="profileDob" class="profile-value">-</p>
+            </section>
+            <section class="card">
+              <h2>Learning Streak</h2>
+              <p id="profileStreak" class="metric-value">0 days</p>
+              <p id="profileStreakNote" class="muted"></p>
+            </section>
+            <section class="card full-width">
+              <h2>Updates</h2>
+              <ul id="profileUpdates" class="list"></ul>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="calendar">
+          <div class="layout">
+            <section class="card full-width">
+              <div class="calendar-head">
+                <h2 id="calendarMonthLabel">Calendar</h2>
+                <div class="calendar-nav">
+                  <button id="prevMonthBtn" class="secondary-btn" type="button">Prev</button>
+                  <button id="nextMonthBtn" class="secondary-btn" type="button">Next</button>
+                </div>
+              </div>
+              <div class="calendar-weekdays">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+              <div id="calendarGrid" class="calendar-grid"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>Add Calendar Event</h2>
+          <button id="closeModalXBtn" class="icon-btn" type="button" aria-label="Close modal">×</button>
+        </div>
+        <p id="eventDateLabel" class="muted"></p>
+        <label>
+          Title
+          <input id="eventTitle" type="text" placeholder="e.g., Math revision" />
+        </label>
+        <label>
+          Type
+          <select id="eventType">
+            <option>Exam</option>
+            <option>Assignment</option>
+            <option>Revision</option>
+            <option>Custom</option>
+          </select>
+        </label>
+        <div class="modal-actions">
+          <button id="saveEventBtn" class="secondary-btn" type="button">Save</button>
+          <button id="closeModalBtn" class="secondary-btn" type="button">Cancel</button>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <main class="layout">
-      <section class="card summary-card">
-        <h2>Overall Progress</h2>
-        <div class="summary-grid">
-          <article>
-            <p class="metric-label">Total XP</p>
-            <p id="xpValue" class="metric-value">-</p>
-          </article>
-          <article>
-            <p class="metric-label">Mastered Topics</p>
-            <p id="masteredValue" class="metric-value">-</p>
-          </article>
-          <article>
-            <p class="metric-label">At-Risk Topics</p>
-            <p id="riskValue" class="metric-value danger">-</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="card chart-card">
-        <div class="card-head">
-          <h2>Mastery by Topic</h2>
-          <span class="pill">Live from API</span>
-        </div>
-        <div id="masteryChart" class="bars"></div>
-      </section>
-
-      <section class="card">
-        <h2>Weak or Decaying Topics</h2>
-        <ul id="weakTopicsList" class="list"></ul>
-      </section>
-
-      <section class="card">
-        <h2>Next Recommendation</h2>
-        <div id="recommendation" class="recommendation">
-          <p class="muted">No recommendation yet.</p>
-        </div>
-      </section>
-
-      <section class="card full-width">
-        <h2>Data Source</h2>
-        <p id="sourceNote" class="muted"></p>
-      </section>
-    </main>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

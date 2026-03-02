@@ -61,6 +61,30 @@ Purpose: keep both backend branches aligned while two people implement Role 1 in
   - `recommended_action: str`
   - `reason_codes: list[str]`
   - `explanation_facts: dict[str, str | float | int]`
+  - `spaced_repetition` (additive):
+    - `generated_at: datetime`
+    - `due_now_count: int`
+    - `due_next_24h_count: int`
+    - `review_queue: list[{ module_id, topic_id, subtopic_id, interval_days, due_in_days, due_now, next_review_at, priority_score }]`
+
+### `GET /students/{id}/spaced-repetition`
+- Response (shape-level lock):
+  - `generated_at: datetime`
+  - `due_now_count: int`
+  - `due_next_24h_count: int`
+  - `review_queue: list[{ module_id, topic_id, subtopic_id, interval_days, due_in_days, due_now, next_review_at, priority_score }]`
+
+### Additive UI Sync Endpoints
+- `GET /students/{id}/statistics/study-time`
+  - `total_minutes`, `session_count`, `last_7_days`, `by_event_type`, `active_days`, `current_streak_days`, `longest_streak_days`
+- `GET /students/{id}/statistics/topic-accuracy`
+  - topic-level `attempts`, `correct_attempts`, `accuracy`, `accuracy_percent`
+- `GET /students/{id}/assignments?status=all|pending|done`
+  - assignment list (`title`, `status`, `attempts`, `accuracy_percent`, `due_date`)
+- `GET /students/{id}/tests`
+  - test history list (`test_name`, `taken_on`, `score_percent`, `attempts`)
+- `GET /students/{id}/tests/summary`
+  - aggregate test metrics (`total_tests`, `average_score`, `best_score`, `latest_score`, `weakest_topic`)
 
 ## Locked Metric Semantics (v0)
 - `mastery`: estimated knowledge level per subtopic in `[0, 1]`.
@@ -83,7 +107,7 @@ Exact formulas can evolve, but ranges and meaning above cannot change without ag
 - `app/api/routers/events.py`
 - `app/api/routers/students.py`
 - `app/api/routers/insights.py`
-- `app/store/memory.py`
+- `app/store/in_memory_store.py`
 - `app/main.py` (router registration)
 - `app/schemas/insight.py` (response assembly models)
 
@@ -105,7 +129,7 @@ Role 1.1 remaining:
 - none for core v0 contracts
 
 Role 1.2 start point (safe to begin now):
-- `app/store/memory.py` using `StudentStateResponse` keyed by `learner_id`
+- `app/store/in_memory_store.py` using `StudentStateResponse` keyed by `learner_id`
 - `app/api/routers/events.py` calling `update_state(...)`
 - `app/api/routers/students.py` calling `apply_inactivity_decay(...)`
 - `app/api/routers/insights.py` consuming `generate_policy(...)` + `build_insight_response(...)`
@@ -130,6 +154,7 @@ Important: Role 1.2 should not change learning formulas in `app/engine/*`; treat
   - `POST /events` works
   - `GET /students/{id}/state` works
   - `GET /students/{id}/insights` works
+  - `GET /students/{id}/spaced-repetition` works
 
 ## Codex Session Bootstrap Prompt (for both of you)
 Use this at the top of each Codex session:
@@ -143,3 +168,7 @@ Use this for partner sessions:
 "Read `README.md`, `CONTEXT.md`, `docs/ROLES.md`, and `docs/BACKEND_CONTRACT.md`.
 Implement only Role 1.2 files (`api`, `store`, `main` wiring).
 Do not modify formulas in `app/engine/*`. Use existing schemas and locked response keys."
+
+## Spaced Repetition Note
+Current backend includes explicit spaced-repetition scheduling in insights output (`spaced_repetition.review_queue`).
+Review urgency still uses inactivity decay and decay-risk prioritization, now with computed next-review timing.
