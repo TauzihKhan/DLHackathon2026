@@ -52,5 +52,17 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
 Frontend currently reads:
 - `GET /students/{id}/state`
 - `GET /students/{id}/insights`
+- `GET /students/{id}/spaced-repetition` (optional dedicated endpoint)
 
 If backend is unavailable, it falls back to deterministic mock data for demo continuity.
+
+## Current API Contract
+- `POST /events` accepts `LearningEvent`, updates learner state, and returns `{ "status": "ok" }`.
+- `GET /students/{id}/state` returns decayed-on-read `StudentStateResponse`.
+- `GET /students/{id}/insights` returns explainable guidance plus a frontend-ready `spaced_repetition` plan (due-now count, next-24h count, ordered review queue).
+- `GET /students/{id}/spaced-repetition` returns only the spaced repetition plan for simpler frontend wiring.
+
+## Spaced Repetition Status
+- Implemented with explicit scheduling on `GET /students/{id}/insights` via `spaced_repetition.review_queue`.
+- Review interval adapts using mastery, confidence, and time since last interaction (through decay-risk-informed urgency).
+- Frontend can consume this directly without extra endpoint stitching.

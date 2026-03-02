@@ -2,7 +2,9 @@ from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 
+from app.engine.spaced_repetition import build_spaced_repetition_plan
 from app.engine.state_engine import apply_inactivity_decay
+from app.schemas.insight import SpacedRepetitionPlan
 from app.schemas.state import StudentStateResponse
 from app.store.in_memory_store import store
 
@@ -23,3 +25,17 @@ def get_student_state(learner_id: str) -> StudentStateResponse:
 
     now = _now_like(state.updated_at)
     return apply_inactivity_decay(state, now)
+
+
+@router.get(
+    "/students/{learner_id}/spaced-repetition",
+    response_model=SpacedRepetitionPlan,
+)
+def get_spaced_repetition_plan(learner_id: str) -> SpacedRepetitionPlan:
+    state = store.get(learner_id)
+    if state is None:
+        raise HTTPException(status_code=404, detail="learner state not found")
+
+    now = _now_like(state.updated_at)
+    decayed_state = apply_inactivity_decay(state, now)
+    return build_spaced_repetition_plan(decayed_state, now)
