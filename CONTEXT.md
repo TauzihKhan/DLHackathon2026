@@ -26,7 +26,8 @@ Build and demo a working hackathon project by the deadline with clear ownership,
   - separate login and register pages before dashboard access
   - register flow includes email verification (backend hook + demo fallback); login is verification-free
   - registration auto-generates a `new_student_*` ID and stores it in session
-  - dashboard now includes tabs: Dashboard, Statistics, Assignments, Tests & Scores
+  - dashboard now includes tabs: Dashboard, Statistics, Assignments, Tests & Scores, Profile
+  - student ID is no longer editable in dashboard UI; it is bound to authenticated user profile/session
   - API integration path to `GET /students/{id}/state` and `GET /students/{id}/insights`
   - deterministic mock fallback when backend endpoints are unavailable
 - Backend feature files are still pending for:

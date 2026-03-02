@@ -70,4 +70,6 @@ Frontend tabs (UI shell ready):
 - Statistics
 - Assignments
 - Tests & Scores
+- Profile
 - Statistics/Assignments/Tests tabs currently use placeholder cards and expected backend endpoint notes.
+- Dashboard no longer exposes editable student ID; student context is taken from logged-in session/profile.

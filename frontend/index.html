@@ -10,127 +10,165 @@
     <div class="bg-shape bg-shape-1"></div>
     <div class="bg-shape bg-shape-2"></div>
 
-    <header class="topbar">
-      <div>
+    <div id="entrySplash" class="entry-splash">
+      <div class="entry-card">
         <p class="eyebrow">Learner Portal</p>
-        <h1>Learner Intelligence Dashboard</h1>
+        <h2>Preparing Your Dashboard</h2>
+        <div class="entry-spinner" aria-hidden="true"></div>
       </div>
-      <div class="controls-wrap">
-        <div class="controls">
-          <label for="studentId">Student ID</label>
-          <input id="studentId" />
-          <button id="refreshBtn">Refresh</button>
+    </div>
+
+    <div id="dashboardApp" class="dashboard-app dashboard-hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Learner Portal</p>
+          <h1>Learner Intelligence Dashboard</h1>
         </div>
-        <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
-      </div>
-    </header>
-
-    <nav class="page-tabs">
-      <button class="page-tab active" data-tab="dashboard" type="button">Dashboard</button>
-      <button class="page-tab" data-tab="statistics" type="button">Statistics</button>
-      <button class="page-tab" data-tab="assignments" type="button">Assignments</button>
-      <button class="page-tab" data-tab="tests" type="button">Tests &amp; Scores</button>
-    </nav>
-
-    <main>
-      <section class="tab-panel" data-panel="dashboard">
-        <div class="layout">
-          <section class="card summary-card">
-            <h2>Overall Progress</h2>
-            <div class="summary-grid">
-              <article>
-                <p class="metric-label">Total XP</p>
-                <p id="xpValue" class="metric-value">-</p>
-              </article>
-              <article>
-                <p class="metric-label">Mastered Topics</p>
-                <p id="masteredValue" class="metric-value">-</p>
-              </article>
-              <article>
-                <p class="metric-label">At-Risk Topics</p>
-                <p id="riskValue" class="metric-value danger">-</p>
-              </article>
-            </div>
-          </section>
-
-          <section class="card chart-card">
-            <div class="card-head">
-              <h2>Mastery by Topic</h2>
-              <span class="pill">Live from API</span>
-            </div>
-            <div id="masteryChart" class="bars"></div>
-          </section>
-
-          <section class="card">
-            <h2>Weak or Decaying Topics</h2>
-            <ul id="weakTopicsList" class="list"></ul>
-          </section>
-
-          <section class="card">
-            <h2>Next Recommendation</h2>
-            <div id="recommendation" class="recommendation">
-              <p class="muted">No recommendation yet.</p>
-            </div>
-          </section>
-
-          <section class="card full-width">
-            <h2>Data Source</h2>
-            <p id="sourceNote" class="muted"></p>
-          </section>
+        <div class="controls-wrap">
+          <div class="controls">
+            <button id="refreshBtn">Refresh</button>
+          </div>
+          <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
         </div>
-      </section>
+      </header>
 
-      <section class="tab-panel hidden" data-panel="statistics">
-        <div class="layout">
-          <section class="card full-width">
-            <h2>Statistics</h2>
-            <p class="muted">Placeholder UI: backend can later provide trend lines, completion rates, and module-level aggregates.</p>
-          </section>
-          <section class="card">
-            <h2>Weekly Study Time</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/statistics/study-time`</p>
-          </section>
-          <section class="card">
-            <h2>Topic Accuracy Trend</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/statistics/topic-accuracy`</p>
-          </section>
-        </div>
-      </section>
+      <nav class="page-tabs">
+        <button class="page-tab active" data-tab="dashboard" type="button">Dashboard</button>
+        <button class="page-tab" data-tab="statistics" type="button">Statistics</button>
+        <button class="page-tab" data-tab="assignments" type="button">Assignments</button>
+        <button class="page-tab" data-tab="tests" type="button">Tests &amp; Scores</button>
+        <button class="page-tab" data-tab="profile" type="button">Profile</button>
+      </nav>
 
-      <section class="tab-panel hidden" data-panel="assignments">
-        <div class="layout">
-          <section class="card full-width">
-            <h2>Assignments</h2>
-            <p class="muted">Placeholder UI: pending assignments, due dates, and recommendation-linked tasks.</p>
-          </section>
-          <section class="card">
-            <h2>Upcoming</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/assignments?status=pending`</p>
-          </section>
-          <section class="card">
-            <h2>Completed</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/assignments?status=done`</p>
-          </section>
-        </div>
-      </section>
+      <main>
+        <section class="tab-panel" data-panel="dashboard">
+          <div class="layout">
+            <section class="card summary-card">
+              <h2>Overall Progress</h2>
+              <div class="summary-grid">
+                <article>
+                  <p class="metric-label">Total XP</p>
+                  <p id="xpValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Mastered Topics</p>
+                  <p id="masteredValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">At-Risk Topics</p>
+                  <p id="riskValue" class="metric-value danger">-</p>
+                </article>
+              </div>
+            </section>
 
-      <section class="tab-panel hidden" data-panel="tests">
-        <div class="layout">
-          <section class="card full-width">
-            <h2>Tests &amp; Scores</h2>
-            <p class="muted">Placeholder UI: test history, scores, and weak-area mapping from assessments.</p>
-          </section>
-          <section class="card">
-            <h2>Recent Tests</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/tests`</p>
-          </section>
-          <section class="card">
-            <h2>Score Distribution</h2>
-            <p class="muted">Expected backend endpoint: `GET /students/{id}/tests/summary`</p>
-          </section>
-        </div>
-      </section>
-    </main>
+            <section class="card chart-card">
+              <div class="card-head">
+                <h2>Mastery by Topic</h2>
+                <span class="pill">Live from API</span>
+              </div>
+              <div id="masteryChart" class="bars"></div>
+            </section>
+
+            <section class="card">
+              <h2>Weak or Decaying Topics</h2>
+              <ul id="weakTopicsList" class="list"></ul>
+            </section>
+
+            <section class="card">
+              <h2>Next Recommendation</h2>
+              <div id="recommendation" class="recommendation">
+                <p class="muted">No recommendation yet.</p>
+              </div>
+            </section>
+
+            <section class="card full-width">
+              <h2>Data Source</h2>
+              <p id="sourceNote" class="muted"></p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="statistics">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Statistics</h2>
+              <p class="muted">Placeholder UI: backend can later provide trend lines, completion rates, and module-level aggregates.</p>
+            </section>
+            <section class="card">
+              <h2>Weekly Study Time</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/statistics/study-time`</p>
+            </section>
+            <section class="card">
+              <h2>Topic Accuracy Trend</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/statistics/topic-accuracy`</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="assignments">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Assignments</h2>
+              <p class="muted">Placeholder UI: pending assignments, due dates, and recommendation-linked tasks.</p>
+            </section>
+            <section class="card">
+              <h2>Upcoming</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/assignments?status=pending`</p>
+            </section>
+            <section class="card">
+              <h2>Completed</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/assignments?status=done`</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="tests">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Tests &amp; Scores</h2>
+              <p class="muted">Placeholder UI: test history, scores, and weak-area mapping from assessments.</p>
+            </section>
+            <section class="card">
+              <h2>Recent Tests</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/tests`</p>
+            </section>
+            <section class="card">
+              <h2>Score Distribution</h2>
+              <p class="muted">Expected backend endpoint: `GET /students/{id}/tests/summary`</p>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel hidden" data-panel="profile">
+          <div class="layout">
+            <section class="card full-width">
+              <h2>Profile</h2>
+              <p class="muted">Your account information and learner activity summary.</p>
+            </section>
+            <section class="card">
+              <h2>Account</h2>
+              <p class="metric-label">Name</p>
+              <p id="profileName" class="profile-value">-</p>
+              <p class="metric-label">Student ID</p>
+              <p id="profileStudentId" class="profile-value">-</p>
+              <p class="metric-label">Email</p>
+              <p id="profileEmail" class="profile-value">-</p>
+              <p class="metric-label">Date of Birth</p>
+              <p id="profileDob" class="profile-value">-</p>
+            </section>
+            <section class="card">
+              <h2>Learning Streak</h2>
+              <p id="profileStreak" class="metric-value">0 days</p>
+              <p id="profileStreakNote" class="muted"></p>
+            </section>
+            <section class="card full-width">
+              <h2>Updates</h2>
+              <ul id="profileUpdates" class="list"></ul>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <script src="app.js"></script>
   </body>
