@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from datetime import datetime
-
 from app.engine.policy import PolicyDecision
 from app.schemas.insight import InsightResponse
 from app.schemas.state import StudentStateResponse, SubtopicState
@@ -34,11 +32,15 @@ def build_explanation_facts(
 
     priority = _find_priority_subtopic(state, decision.priority_subtopic_id)
     if priority is None:
-        facts["top_reason"] = decision.reason_codes[0] if decision.reason_codes else "NO_DATA"
+        facts["top_reason"] = (
+            decision.reason_codes[0] if decision.reason_codes else "NO_DATA"
+        )
         return facts
 
     accuracy = (
-        (priority.correct_attempts / priority.attempts) if priority.attempts > 0 else 0.0
+        (priority.correct_attempts / priority.attempts)
+        if priority.attempts > 0
+        else 0.0
     )
     facts.update(
         {
@@ -51,7 +53,9 @@ def build_explanation_facts(
             "priority_attempts": priority.attempts,
             "priority_correct_attempts": priority.correct_attempts,
             "priority_accuracy": round(accuracy, 4),
-            "top_reason": decision.reason_codes[0] if decision.reason_codes else "GENERAL_REINFORCEMENT",
+            "top_reason": decision.reason_codes[0]
+            if decision.reason_codes
+            else "GENERAL_REINFORCEMENT",
         }
     )
     return facts
