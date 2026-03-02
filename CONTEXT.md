@@ -22,7 +22,9 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 - Full-stack boundaries are intentionally lean to maximize speed-to-demo.
 - Backend parallel-work contract is documented in `docs/BACKEND_CONTRACT.md` for Role 1.1 and Role 1.2 alignment.
 - Frontend now has a working Role 2 dashboard slice in `frontend/`:
-  - `index.html`, `styles.css`, `app.js`
+  - `index.html`, `login.html`, `register.html`, `auth.js`, `styles.css`, `app.js`
+  - separate login and register pages before dashboard access
+  - email verification step with backend hook + demo fallback
   - visualized mastery bars, weak topics list, and recommendation panel
   - API integration path to `GET /students/{id}/state` and `GET /students/{id}/insights`
   - deterministic mock fallback when backend endpoints are unavailable
@@ -129,6 +131,7 @@ Template:
 - Speed-to-demo is prioritized over full production-hardening.
 - Deterministic behavior is preferred for judging/demo reliability.
 - We can start with rule-based guidance and add LLM polish as an optional layer.
+- Frontend authentication is local/browser-stored for demo; backend auth/email verification can replace it incrementally.
 
 ## Known Risks
 - Scope creep under time pressure

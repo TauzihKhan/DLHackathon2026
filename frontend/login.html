@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Learner Intelligence</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-auth-page="login">
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <section class="auth-shell">
+      <div class="auth-card">
+        <p class="eyebrow">Role 2 UI Demo</p>
+        <h1>Login</h1>
+        <p class="muted auth-subtitle">Access your learning dashboard.</p>
+
+        <form id="loginForm" class="auth-form">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" required placeholder="you@example.com" />
+
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" required placeholder="Enter password" />
+
+          <button class="primary-btn" type="submit">Login</button>
+        </form>
+
+        <form id="verifyForm" class="auth-form hidden">
+          <p class="verify-title">Email Verification</p>
+          <p id="verifyHint" class="muted"></p>
+          <p id="verifyMode" class="muted"></p>
+
+          <label for="verificationCode">Enter verification code</label>
+          <input id="verificationCode" type="text" inputmode="numeric" required placeholder="6-digit code" />
+
+          <button class="primary-btn" type="submit">Verify Email</button>
+        </form>
+
+        <p id="authMessage" class="status-msg"></p>
+
+        <p class="switch-link">New user? <a href="register.html">Go to Register</a></p>
+      </div>
+    </section>
+
+    <script src="auth.js"></script>
+  </body>
+</html>

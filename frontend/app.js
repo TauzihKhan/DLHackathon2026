@@ -1,6 +1,12 @@
 const API_BASE = window.localStorage.getItem('apiBase') || 'http://localhost:8000';
 
+const STORAGE_KEYS = {
+  users: 'dlh_users',
+  session: 'dlh_session'
+};
+
 const nodes = {
+  logoutBtn: document.getElementById('logoutBtn'),
   studentId: document.getElementById('studentId'),
   refreshBtn: document.getElementById('refreshBtn'),
   xpValue: document.getElementById('xpValue'),
@@ -27,6 +33,35 @@ const mockInsight = {
   recommendation: 'Prioritize 2 short practice sets on Trigonometry identities with easy-to-medium difficulty.',
   explanation: 'Accuracy dropped to 40% over the last two sessions and response time is increasing.'
 };
+
+function getUsers() {
+  return JSON.parse(window.localStorage.getItem(STORAGE_KEYS.users) || '[]');
+}
+
+function getCurrentSession() {
+  return JSON.parse(window.localStorage.getItem(STORAGE_KEYS.session) || 'null');
+}
+
+function clearSession() {
+  window.localStorage.removeItem(STORAGE_KEYS.session);
+}
+
+function authGuard() {
+  const session = getCurrentSession();
+  if (!session?.email) {
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  const user = getUsers().find((item) => item.email === session.email && item.verified);
+  if (!user) {
+    clearSession();
+    window.location.href = 'login.html';
+    return false;
+  }
+
+  return true;
+}
 
 async function fetchJson(url) {
   const res = await fetch(url);
@@ -84,9 +119,16 @@ async function loadDashboard() {
   }
 }
 
+nodes.logoutBtn.addEventListener('click', () => {
+  clearSession();
+  window.location.href = 'login.html';
+});
+
 nodes.refreshBtn.addEventListener('click', loadDashboard);
 nodes.studentId.addEventListener('keydown', (ev) => {
   if (ev.key === 'Enter') loadDashboard();
 });
 
-loadDashboard();
+if (authGuard()) {
+  loadDashboard();
+}

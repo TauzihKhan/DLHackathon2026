@@ -44,13 +44,22 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
 1. Backend (when implemented):
    - `pip install -r requirements.txt`
    - `uvicorn app.main:app --reload`
-2. Frontend dashboard:
+2. Frontend:
    - `cd frontend`
    - `python3 -m http.server 5500`
-   - Open `http://localhost:5500`
+   - Open `http://localhost:5500/login.html`
 
 Frontend currently reads:
 - `GET /students/{id}/state`
 - `GET /students/{id}/insights`
 
 If backend is unavailable, it falls back to deterministic mock data for demo continuity.
+
+Frontend auth flow (demo mode):
+- Users must login/register before accessing dashboard.
+- Login and register are now separate pages:
+  - `http://localhost:5500/login.html`
+  - `http://localhost:5500/register.html`
+- Register captures name, email, DOB, password.
+- Verification tries backend endpoint `POST /auth/send-verification`; if unavailable, it falls back to demo code in UI.
+- User records are stored in browser local storage for demo only.
