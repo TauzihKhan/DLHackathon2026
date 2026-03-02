@@ -1,6 +1,6 @@
-# Backend Contract (Role 1.1 + Role 1.2)
+# Backend Contract (Role 1 + Role 3)
 
-Purpose: keep both backend branches aligned while two people implement Role 1 in parallel.
+Purpose: keep backend implementation aligned across roles and prevent API-key/shape drift.
 
 ## Owners
 - Role 1.1 (you): learning-state engine + decay + core metrics.
@@ -62,6 +62,31 @@ Purpose: keep both backend branches aligned while two people implement Role 1 in
   - `reason_codes: list[str]`
   - `explanation_facts: dict[str, str | float | int]`
 
+### `GET /students/{id}/insights/narrative`
+- Purpose: Role 3 natural-language layer on top of deterministic insights.
+- Response (shape-level lock):
+  - `learner_id: str`
+  - `generated_at: datetime`
+  - `generation_mode: "llm" | "fallback"`
+  - `priority_subtopic_id: str | null`
+  - `weak_subtopics: list[str]`
+  - `reason_codes: list[str]`
+  - `recommended_action: str`
+  - `narrative_summary: str`
+  - `narrative_explanation: str`
+  - `practice_questions: list[PracticeQuestion]`
+  - `source_explanation_facts: dict[str, str | float | int]`
+
+- `PracticeQuestion`:
+  - `question: str`
+  - `intent: str`
+  - `difficulty: int` (1-5)
+
+Role 3 reliability semantics:
+- Endpoint must never hard-fail because of LLM unavailability.
+- If LLM is disabled/misconfigured/fails, response must still return with `generation_mode="fallback"`.
+- `source_explanation_facts` should be grounded in deterministic `/insights` evidence.
+
 ## Locked Metric Semantics (v0)
 - `mastery`: estimated knowledge level per subtopic in `[0, 1]`.
 - `confidence`: stability of estimate in `[0, 1]`; increases with evidence.
@@ -87,10 +112,16 @@ Exact formulas can evolve, but ranges and meaning above cannot change without ag
 - `app/main.py` (router registration)
 - `app/schemas/insight.py` (response assembly models)
 
+### Role 3 primary files
+- `app/core/config.py`
+- `app/engine/narrative.py`
+- `app/schemas/narrative.py`
+- `app/api/routers/insights.py` (narrative endpoint wiring)
+
 ### Shared file rule
 - `app/schemas/event.py` is shared; changes require sync in both branches.
 
-## Current Build Status (As of 2026-03-01)
+## Current Build Status (As of 2026-03-02)
 
 Completed in `backend-1` (Role 1.1):
 - `app/schemas/event.py`
@@ -113,6 +144,15 @@ Role 1.2 start point (safe to begin now):
 
 Important: Role 1.2 should not change learning formulas in `app/engine/*`; treat engine outputs as source of truth.
 
+Completed for Role 3:
+- `app/core/config.py`
+- `app/schemas/narrative.py`
+- `app/engine/narrative.py`
+- `GET /students/{id}/insights/narrative` in `app/api/routers/insights.py`
+
+Role 3 remaining:
+- frontend consumption and presentation of narrative payload
+
 ## Non-Breaking Change Rules
 - Do not rename existing JSON keys once used by frontend.
 - Additive changes are allowed (new optional fields).
@@ -130,6 +170,35 @@ Important: Role 1.2 should not change learning formulas in `app/engine/*`; treat
   - `POST /events` works
   - `GET /students/{id}/state` works
   - `GET /students/{id}/insights` works
+  - `GET /students/{id}/insights/narrative` works
+
+## Example Narrative Response (contract illustration)
+
+```json
+{
+  "learner_id": "learner-123",
+  "generated_at": "2026-03-02T10:00:00Z",
+  "generation_mode": "fallback",
+  "priority_subtopic_id": "fractions-basics",
+  "weak_subtopics": ["fractions-basics"],
+  "reason_codes": ["LOW_MASTERY", "LOW_CONFIDENCE"],
+  "recommended_action": "Do 3 targeted medium-difficulty questions on fractions-basics.",
+  "narrative_summary": "Current priority is fractions-basics. 1 weak subtopic(s) were detected from the latest learner state.",
+  "narrative_explanation": "This recommendation is driven by reason code LOW_MASTERY. The action is grounded in computed mastery, confidence, decay risk, and attempt evidence from the structured backend output.",
+  "practice_questions": [
+    {
+      "question": "Solve one medium-step problem on fractions-basics and explain each step in one sentence.",
+      "intent": "Checks conceptual understanding and reduces brittle memorization.",
+      "difficulty": 3
+    }
+  ],
+  "source_explanation_facts": {
+    "priority_mastery": 0.42,
+    "priority_confidence": 0.28,
+    "priority_decay_risk_score": 0.31
+  }
+}
+```
 
 ## Codex Session Bootstrap Prompt (for both of you)
 Use this at the top of each Codex session:
@@ -143,3 +212,11 @@ Use this for partner sessions:
 "Read `README.md`, `CONTEXT.md`, `docs/ROLES.md`, and `docs/BACKEND_CONTRACT.md`.
 Implement only Role 1.2 files (`api`, `store`, `main` wiring).
 Do not modify formulas in `app/engine/*`. Use existing schemas and locked response keys."
+
+## Codex Session Bootstrap Prompt (Role 3 specific)
+Use this for AI narrative sessions:
+
+"Read `README.md`, `CONTEXT.md`, `docs/ROLES.md`, and `docs/BACKEND_CONTRACT.md`.
+Implement Role 3 narrative only from structured backend signals.
+Do not consume raw event logs directly in narrative output.
+Do not rename locked response keys for `/students/{id}/insights` or `/students/{id}/insights/narrative`."

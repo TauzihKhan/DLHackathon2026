@@ -26,25 +26,25 @@ model a learner's changing state over time and generate clear, actionable guidan
 │  │     ├─ students.py
 │  │     └─ insights.py
 │  ├─ core/
-│  │  ├─ config.py
-│  │  └─ logging.py
+│  │  └─ config.py
 │  ├─ schemas/
 │  │  ├─ event.py
 │  │  ├─ state.py
-│  │  └─ insight.py
+│  │  ├─ insight.py
+│  │  └─ narrative.py
 │  ├─ engine/
 │  │  ├─ state_engine.py
 │  │  ├─ explain.py
 │  │  ├─ policy.py
-│  │  └─ decay.py
+│  │  ├─ decay.py
+│  │  └─ narrative.py
 │  └─ store/
 │     └─ memory.py
 ├─ scripts/
 │  ├─ seed_demo_data.py
 │  └─ run_dev.sh
 ├─ tests/
-│  ├─ test_state_engine.py
-│  └─ test_insights.py
+│  └─ test_role3_narrative.py
 └─ docs/
    └─ PROJECT_STRUCTURE.md
 ```
@@ -58,16 +58,16 @@ model a learner's changing state over time and generate clear, actionable guidan
   Single FastAPI entrypoint so everyone runs the app the same way.
 
 - `app/api/`
-  HTTP layer only. Contains endpoints for health, event ingest, state, and insights.
+  HTTP layer only. Contains endpoints for health, event ingest, state, deterministic insights, and Role 3 narrative insights.
 
 - `app/core/`
   Shared runtime setup (settings, logging) to avoid config logic spreading across features.
 
 - `app/schemas/`
-  Canonical payload contracts for events, learner state, and insight outputs.
+  Canonical payload contracts for events, learner state, deterministic insights, and narrative outputs.
 
 - `app/engine/`
-  Core intelligence. This is where learner state is updated, decay is applied, and next actions are chosen.
+  Core intelligence. This is where learner state is updated, decay is applied, next actions are chosen, and Role 3 narrative text/questions are generated.
 
 - `app/store/`
   Lightweight persistence abstraction. Start with in-memory storage for predictable demo speed.
