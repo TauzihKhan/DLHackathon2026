@@ -23,6 +23,22 @@ The experience is simple:
 - Statistics, assignments, and test history synced from backend when available
 - Calendar planner with local event storage
 
+## FAQ -> What is mastery?
+In NOVA, **mastery** is your current confidence score for a topic, shown as a percentage (0-100%).
+It is updated from your learning events (quiz/assignment/flashcard attempts), and it is not just a raw average.
+
+What affects mastery:
+- **Correct vs incorrect attempts**: getting answers right consistently pushes mastery up.
+- **Recency of practice**: long inactivity applies decay, so mastery can drift down over time.
+- **Topic-level aggregation**: the dashboard rolls up subtopic behavior into topic mastery.
+
+How to read it in the UI:
+- **Mastered**: `>= 70%`
+- **Developing**: `50% - 69%`
+- **At-risk**: `< 50%`
+
+So if your score drops even without new mistakes, that usually means the system detected inactivity/retention risk and wants you to revisit that topic.
+
 ## Run Locally
 
 ### Quick Start (recommended)
@@ -42,8 +58,9 @@ If you want both together:
 ```bash
 make dev
 ```
+- Thats it!
 
-### Manual (if you prefer)
+### Manual method for the terminal bois
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
@@ -75,6 +92,4 @@ Open:
 - If backend calls fail, frontend automatically uses deterministic mock data.
 
 ## Notes
-- This repo is optimized for speed-to-demo and clear visuals.
-- Architecture is intentionally lightweight for hackathon iteration.
-- `.venv/` stays local and is intentionally not committed to git.
+- `.venv/` stays local, so all dependencies installed are boxed within the app, and wont pollute your system.
