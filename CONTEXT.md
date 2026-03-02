@@ -28,14 +28,17 @@ Build and demo a working hackathon project by the deadline with clear ownership,
   - registration auto-generates a `new_student_*` ID and stores it in session
   - dashboard now includes tabs: Dashboard, Statistics, Assignments, Tests & Scores, Profile
   - student ID is no longer editable in dashboard UI; it is bound to authenticated user profile/session
-  - API integration path to `GET /students/{id}/state` and `GET /students/{id}/insights`
+  - visualized mastery bars, weak topics list, recommendations, and calendar planner
+  - API integration path to `GET /students/{id}/state`, `GET /students/{id}/insights`, and `GET /students/{id}/plan?days=7` (with deterministic fallback)
   - deterministic mock fallback when backend endpoints are unavailable
-- Backend feature files are still pending for:
-  - `app/api/routers`, `app/core`, `app/schemas`, `app/engine`, `app/store`
+- Backend v0 implementation is now present for core demo flow:
+  - `app/api/routers` (`health`, `events`, `students`, `insights`)
+  - `app/schemas` (`event`, `state`, `insight`)
+  - `app/engine` (`state_engine`, `decay`, `policy`, `explain`)
+  - `app/store/in_memory_store.py` for thread-safe in-memory persistence keyed by learner.
 - Existing package markers:
   - `app/__init__.py`
   - `app/api/__init__.py`
-- Most backend feature files are intentionally not created yet; focus remains on first runnable vertical slice.
 
 ## Problem Statement Alignment
 We are building an AI-powered learning-state engine that:
@@ -68,7 +71,7 @@ We are building an AI-powered learning-state engine that:
    - simple inactivity decay
    - initial next-best-action policy and explanation
 4. Add persistence path:
-   - start with `app/store/memory.py`
+   - start with `app/store/in_memory_store.py`
 5. Seed deterministic demo data + replay script:
    - `scripts/seed_demo_data.py`
    - optional `scripts/replay_events.py`
@@ -77,6 +80,7 @@ We are building an AI-powered learning-state engine that:
 - `POST /events`: accept an interaction event and update state
 - `GET /students/{id}/state`: return current learner state snapshot
 - `GET /students/{id}/insights`: return top actionable recommendation + explanation
+- `GET /students/{id}/spaced-repetition`: return dedicated review queue and due schedule for frontend
 - `GET /health`: service health for demos/checks
 
 ## Frontend-Driven Backend Hooks (Role 2 Request)
@@ -154,3 +158,15 @@ Template:
 - Confirm top 1-2 priorities for next session.
 - Ensure main/demo branch is runnable.
 - Capture new decisions in this file.
+
+## Implementation Snapshot (2026-03-02)
+- Backend v0 flow is implemented and runnable by contract:
+  - `POST /events`: `store.get -> update_state -> store.save -> {"status":"ok"}`
+  - `GET /students/{id}/state`: fetch stored state, apply inactivity decay on read
+  - `GET /students/{id}/insights`: generate policy + explainable insight from decayed state
+  - `GET /students/{id}/spaced-repetition`: return frontend-ready review plan (`due_now_count`, `due_next_24h_count`, `review_queue`)
+- Persistence is in-memory via `app/store/in_memory_store.py` keyed by `learner_id`.
+- Learning computation is centralized in `app/engine/state_engine.py` (single source of mastery updates).
+- Spaced-repetition behavior now includes explicit review scheduling in insights output (`spaced_repetition.review_queue`) with adaptive intervals based on mastery, confidence, and inactivity.
+
+

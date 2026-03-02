@@ -64,8 +64,7 @@ const nodes = {
   eventTitle: document.getElementById('eventTitle'),
   eventType: document.getElementById('eventType'),
   saveEventBtn: document.getElementById('saveEventBtn'),
-  closeModalBtn: document.getElementById('closeModalBtn')
-  ,
+  closeModalBtn: document.getElementById('closeModalBtn'),
   closeModalXBtn: document.getElementById('closeModalXBtn')
 };
 

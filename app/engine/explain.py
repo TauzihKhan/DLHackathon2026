@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from app.engine.policy import PolicyDecision
+from app.engine.spaced_repetition import build_spaced_repetition_plan
 from app.schemas.insight import InsightResponse
 from app.schemas.state import StudentStateResponse, SubtopicState
 
@@ -68,6 +69,8 @@ def build_insight_response(
 ) -> InsightResponse:
     """Compose final insights payload from state + policy output."""
 
+    spaced_plan = build_spaced_repetition_plan(state, generated_at)
+
     return InsightResponse(
         learner_id=state.learner_id,
         generated_at=generated_at,
@@ -76,4 +79,5 @@ def build_insight_response(
         recommended_action=decision.recommended_action,
         reason_codes=decision.reason_codes,
         explanation_facts=build_explanation_facts(state, decision),
+        spaced_repetition=spaced_plan,
     )

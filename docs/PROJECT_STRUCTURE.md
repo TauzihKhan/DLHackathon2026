@@ -37,7 +37,7 @@ model a learner's changing state over time and generate clear, actionable guidan
 │  │  ├─ policy.py
 │  │  └─ decay.py
 │  └─ store/
-│     └─ memory.py
+│     └─ in_memory_store.py
 ├─ scripts/
 │  ├─ seed_demo_data.py
 │  └─ run_dev.sh
@@ -91,3 +91,8 @@ When adding a new feature, place code by responsibility:
 - Shared app settings/logging -> `core/`
 
 This keeps ownership clear and avoids mixing concerns under deadline pressure.
+
+
+## Recent Update
+- Added `app/engine/spaced_repetition.py` to compute adaptive review cadence and frontend-ready review queues.
+
