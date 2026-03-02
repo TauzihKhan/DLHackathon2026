@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Learner State Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Role 2 UI Demo</p>
+        <h1>Learner Intelligence Dashboard</h1>
+      </div>
+      <div class="controls">
+        <label for="studentId">Student ID</label>
+        <input id="studentId" value="student-001" />
+        <button id="refreshBtn">Refresh</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="card summary-card">
+        <h2>Overall Progress</h2>
+        <div class="summary-grid">
+          <article>
+            <p class="metric-label">Total XP</p>
+            <p id="xpValue" class="metric-value">-</p>
+          </article>
+          <article>
+            <p class="metric-label">Mastered Topics</p>
+            <p id="masteredValue" class="metric-value">-</p>
+          </article>
+          <article>
+            <p class="metric-label">At-Risk Topics</p>
+            <p id="riskValue" class="metric-value danger">-</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="card chart-card">
+        <div class="card-head">
+          <h2>Mastery by Topic</h2>
+          <span class="pill">Live from API</span>
+        </div>
+        <div id="masteryChart" class="bars"></div>
+      </section>
+
+      <section class="card">
+        <h2>Weak or Decaying Topics</h2>
+        <ul id="weakTopicsList" class="list"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Next Recommendation</h2>
+        <div id="recommendation" class="recommendation">
+          <p class="muted">No recommendation yet.</p>
+        </div>
+      </section>
+
+      <section class="card full-width">
+        <h2>Data Source</h2>
+        <p id="sourceNote" class="muted"></p>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -21,14 +21,17 @@ Build and demo a working hackathon project by the deadline with clear ownership,
 - Demo-first scaffold is set and documented in `docs/PROJECT_STRUCTURE.md`.
 - Full-stack boundaries are intentionally lean to maximize speed-to-demo.
 - Backend parallel-work contract is documented in `docs/BACKEND_CONTRACT.md` for Role 1.1 and Role 1.2 alignment.
-- Folder skeleton currently exists for:
-  - `frontend/src` (pages, components, services, styles) and `frontend/public`
+- Frontend now has a working Role 2 dashboard slice in `frontend/`:
+  - `index.html`, `styles.css`, `app.js`
+  - visualized mastery bars, weak topics list, and recommendation panel
+  - API integration path to `GET /students/{id}/state` and `GET /students/{id}/insights`
+  - deterministic mock fallback when backend endpoints are unavailable
+- Backend feature files are still pending for:
   - `app/api/routers`, `app/core`, `app/schemas`, `app/engine`, `app/store`
-  - `tests`, `scripts`, `docs`
 - Existing package markers:
   - `app/__init__.py`
   - `app/api/__init__.py`
-- Most feature files are intentionally not created yet; only structure is in place.
+- Most backend feature files are intentionally not created yet; focus remains on first runnable vertical slice.
 
 ## Problem Statement Alignment
 We are building an AI-powered learning-state engine that:
@@ -83,11 +86,15 @@ Reference structure and ownership rules:
 - `docs/PROJECT_STRUCTURE.md`
 
 ## Environment Setup (To Update As You Decide Stack)
-- Install dependencies
-- Run app locally
-- Run tests/lint
-
-Add concrete commands here once stack is finalized.
+- Backend:
+  - `pip install -r requirements.txt`
+  - `uvicorn app.main:app --reload`
+- Frontend:
+  - `cd frontend`
+  - `python3 -m http.server 5500`
+  - open `http://localhost:5500`
+- Tests/lint:
+  - pending, to be added with first backend implementation slice
 
 ## Coding Conventions
 - Keep functions/modules small and testable.

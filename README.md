@@ -39,3 +39,18 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
 ## Next Steps
 - Implement first end-to-end slice: `POST /events` -> state update -> `GET /students/{id}/insights`
 - Add run/build/test commands
+
+## Local Run (Current)
+1. Backend (when implemented):
+   - `pip install -r requirements.txt`
+   - `uvicorn app.main:app --reload`
+2. Frontend dashboard:
+   - `cd frontend`
+   - `python3 -m http.server 5500`
+   - Open `http://localhost:5500`
+
+Frontend currently reads:
+- `GET /students/{id}/state`
+- `GET /students/{id}/insights`
+
+If backend is unavailable, it falls back to deterministic mock data for demo continuity.
