@@ -47,6 +47,12 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
 - Output: natural-language summary/explanation + targeted practice questions
 - Reliability rule: if LLM is disabled or fails, endpoint returns deterministic fallback narrative
 
+## Spaced Repetition (Backend v1)
+- New endpoint: `GET /students/{id}/reviews/due`
+- Purpose: return a frontend-ready queue of subtopics that are currently due for review
+- Ranking fields in each item: `priority_score`, `days_overdue`, and schedule fields
+- State integration: each subtopic now tracks `review_interval_days`, `next_review_at`, and `review_due`
+
 Backend contract reference:
 - Full request/response lock: `docs/BACKEND_CONTRACT.md`
 - Folder responsibilities: `docs/PROJECT_STRUCTURE.md`

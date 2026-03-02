@@ -2,6 +2,12 @@ from __future__ import annotations
 import math
 from datetime import datetime
 from app.engine.decay import apply_decay_to_mastery, compute_decay_risk_score
+from app.engine.repetition import (
+    compute_next_review_at,
+    compute_review_interval_days,
+    is_review_due,
+    schedule_for_subtopic,
+)
 from app.schemas.event import LearningEvent
 from app.schemas.state import StudentStateResponse, SubtopicState
 
@@ -32,6 +38,8 @@ def _index_subtopics(subtopics: list[SubtopicState]) -> dict[str, SubtopicState]
 
 
 def _starting_subtopic(event: LearningEvent) -> SubtopicState:
+    initial_interval_days = 1.0
+    initial_next_review_at = compute_next_review_at(event.timestamp, initial_interval_days)
     return SubtopicState(
         module_id=event.module_id,
         topic_id=event.topic_id,
@@ -43,6 +51,9 @@ def _starting_subtopic(event: LearningEvent) -> SubtopicState:
         last_interaction_at=event.timestamp,
         attempts=0,
         correct_attempts=0,
+        review_interval_days=initial_interval_days,
+        next_review_at=initial_next_review_at,
+        review_due=False,
     )
 
 
@@ -93,6 +104,14 @@ def update_state(
     mastery = _updated_mastery(decayed_mastery, event)
     confidence = _updated_confidence(previous_subtopic.confidence, attempts)
     xp_gain = _xp_delta(event)
+    review_interval_days = compute_review_interval_days(
+        mastery=mastery,
+        confidence=confidence,
+        attempts=attempts,
+        correct_attempts=correct_attempts,
+        decay_risk_score=0.0,
+    )
+    next_review_at = compute_next_review_at(event.timestamp, review_interval_days)
 
     updated_subtopic = SubtopicState(
         module_id=event.module_id,
@@ -105,6 +124,9 @@ def update_state(
         last_interaction_at=event.timestamp,
         attempts=attempts,
         correct_attempts=correct_attempts,
+        review_interval_days=review_interval_days,
+        next_review_at=next_review_at,
+        review_due=False,
     )
 
     subtopics_by_key[key] = updated_subtopic
@@ -128,6 +150,7 @@ def apply_inactivity_decay(
     decayed_subtopics: list[SubtopicState] = []
     for subtopic in state.subtopics:
         risk = compute_decay_risk_score(subtopic.last_interaction_at, now)
+        interval_days, next_review_at = schedule_for_subtopic(subtopic)
         decayed_subtopics.append(
             SubtopicState(
                 module_id=subtopic.module_id,
@@ -144,6 +167,9 @@ def apply_inactivity_decay(
                 last_interaction_at=subtopic.last_interaction_at,
                 attempts=subtopic.attempts,
                 correct_attempts=subtopic.correct_attempts,
+                review_interval_days=interval_days,
+                next_review_at=next_review_at,
+                review_due=is_review_due(next_review_at, now),
             )
         )
 

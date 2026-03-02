@@ -51,6 +51,29 @@ Purpose: keep backend implementation aligned across roles and prevent API-key/sh
   - `last_interaction_at: datetime`
   - `attempts: int`
   - `correct_attempts: int`
+  - `review_interval_days: float` (>=0)
+  - `next_review_at: datetime | null`
+  - `review_due: bool`
+
+### `GET /students/{id}/reviews/due`
+- Purpose: frontend-ready spaced-repetition queue.
+- Response (shape-level lock):
+  - `learner_id: str`
+  - `generated_at: datetime`
+  - `due_count: int`
+  - `items: list[DueReviewItem]`
+
+- `DueReviewItem`:
+  - `module_id: str`
+  - `topic_id: str`
+  - `subtopic_id: str`
+  - `mastery: float` (0.0-1.0)
+  - `confidence: float` (0.0-1.0)
+  - `decay_risk_score: float` (0.0-1.0)
+  - `review_interval_days: float` (>=0)
+  - `next_review_at: datetime`
+  - `days_overdue: float` (>=0)
+  - `priority_score: float` (0.0-1.0)
 
 ### `GET /students/{id}/insights`
 - Response (shape-level lock):
@@ -118,6 +141,12 @@ Exact formulas can evolve, but ranges and meaning above cannot change without ag
 - `app/schemas/narrative.py`
 - `app/api/routers/insights.py` (narrative endpoint wiring)
 
+### Spaced repetition primary files
+- `app/engine/repetition.py`
+- `app/schemas/review.py`
+- `app/schemas/state.py` (review schedule fields)
+- `app/api/routers/students.py` (`/reviews/due` endpoint)
+
 ### Shared file rule
 - `app/schemas/event.py` is shared; changes require sync in both branches.
 
@@ -153,6 +182,12 @@ Completed for Role 3:
 Role 3 remaining:
 - frontend consumption and presentation of narrative payload
 
+Completed for spaced repetition v1:
+- schedule fields in `SubtopicState` (`review_interval_days`, `next_review_at`, `review_due`)
+- `app/engine/repetition.py` (interval policy + due queue assembly)
+- `app/schemas/review.py`
+- `GET /students/{id}/reviews/due` in `app/api/routers/students.py`
+
 ## Non-Breaking Change Rules
 - Do not rename existing JSON keys once used by frontend.
 - Additive changes are allowed (new optional fields).
@@ -169,6 +204,7 @@ Role 3 remaining:
   - app starts
   - `POST /events` works
   - `GET /students/{id}/state` works
+  - `GET /students/{id}/reviews/due` works
   - `GET /students/{id}/insights` works
   - `GET /students/{id}/insights/narrative` works
 

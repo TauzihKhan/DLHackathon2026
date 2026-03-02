@@ -11,6 +11,8 @@ Core learner-state logic, decay, policy, and explanation helpers.
   - Deterministic weak-topic prioritization and recommended action selection.
 - `explain.py`
   - Deterministic explanation facts assembly for `/insights`.
+- `repetition.py`
+  - Spaced-repetition interval policy and due-review queue assembly for `/reviews/due`.
 - `narrative.py`
   - Role 3 narrative generation layer for `/insights/narrative`:
     - Uses structured deterministic insight as source of truth.

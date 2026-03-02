@@ -31,13 +31,15 @@ model a learner's changing state over time and generate clear, actionable guidan
 │  │  ├─ event.py
 │  │  ├─ state.py
 │  │  ├─ insight.py
-│  │  └─ narrative.py
+│  │  ├─ narrative.py
+│  │  └─ review.py
 │  ├─ engine/
 │  │  ├─ state_engine.py
 │  │  ├─ explain.py
 │  │  ├─ policy.py
 │  │  ├─ decay.py
-│  │  └─ narrative.py
+│  │  ├─ narrative.py
+│  │  └─ repetition.py
 │  └─ store/
 │     └─ memory.py
 ├─ scripts/
@@ -58,16 +60,16 @@ model a learner's changing state over time and generate clear, actionable guidan
   Single FastAPI entrypoint so everyone runs the app the same way.
 
 - `app/api/`
-  HTTP layer only. Contains endpoints for health, event ingest, state, deterministic insights, and Role 3 narrative insights.
+  HTTP layer only. Contains endpoints for health, event ingest, state, due reviews, deterministic insights, and Role 3 narrative insights.
 
 - `app/core/`
   Shared runtime setup (settings, logging) to avoid config logic spreading across features.
 
 - `app/schemas/`
-  Canonical payload contracts for events, learner state, deterministic insights, and narrative outputs.
+  Canonical payload contracts for events, learner state, due reviews, deterministic insights, and narrative outputs.
 
 - `app/engine/`
-  Core intelligence. This is where learner state is updated, decay is applied, next actions are chosen, and Role 3 narrative text/questions are generated.
+  Core intelligence. This is where learner state is updated, decay is applied, spaced-repetition schedules are computed, next actions are chosen, and Role 3 narrative text/questions are generated.
 
 - `app/store/`
   Lightweight persistence abstraction. Start with in-memory storage for predictable demo speed.

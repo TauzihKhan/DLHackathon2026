@@ -44,6 +44,7 @@ We are building an AI-powered learning-state engine that:
 - Role 3 implementation direction: narrative generation is grounded on Role 1 structured outputs only
   (`reason_codes`, `weak_subtopics`, `priority_subtopic_id`, `explanation_facts`).
 - Reliability requirement: Role 3 endpoint must degrade to deterministic fallback text/questions if LLM call fails.
+- Spaced repetition v1 is backend-owned and exposed via API for UI consumption (UI must not implement interval logic).
 - Documentation references:
   - structure and ownership: `docs/PROJECT_STRUCTURE.md`
   - backend parallel contract: `docs/BACKEND_CONTRACT.md`
@@ -72,6 +73,7 @@ We are building an AI-powered learning-state engine that:
 ## Minimum Demo Contract (v0)
 - `POST /events`: accept an interaction event and update state
 - `GET /students/{id}/state`: return current learner state snapshot
+- `GET /students/{id}/reviews/due`: return due review queue for spaced repetition
 - `GET /students/{id}/insights`: return top actionable recommendation + explanation
 - `GET /health`: service health for demos/checks
 - `GET /students/{id}/insights/narrative`: Role 3 natural-language explanation + targeted practice questions
