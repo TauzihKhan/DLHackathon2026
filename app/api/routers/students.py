@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.engine.state_engine import apply_inactivity_decay
 from app.schemas.state import StudentStateResponse
-from app.store.memory import store
+from app.store.in_memory_store import store
 
 router = APIRouter(tags=["students"])
 
