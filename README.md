@@ -25,14 +25,31 @@ The experience is simple:
 
 ## Run Locally
 
-### 1) Backend
+### Quick Start (recommended)
 ```bash
+make setup
+```
+
+Then run in separate terminals:
+```bash
+make run-backend
+make run-frontend
+```
+
+Backend runs at `http://localhost:8000`.
+
+If you want both together:
+```bash
+make dev
+```
+
+### Manual (if you prefer)
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
-Backend runs at `http://localhost:8000`.
-
-### 2) Frontend
 In another terminal:
 ```bash
 cd frontend
@@ -60,3 +77,4 @@ Open:
 ## Notes
 - This repo is optimized for speed-to-demo and clear visuals.
 - Architecture is intentionally lightweight for hackathon iteration.
+- `.venv/` stays local and is intentionally not committed to git.
