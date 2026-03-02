@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -27,8 +30,8 @@ class InsightResponse(BaseModel):
     learner_id: str = Field(min_length=1)
     generated_at: datetime
     weak_subtopics: list[str] = Field(default_factory=list)
-    priority_subtopic_id: str | None = None
+    priority_subtopic_id: Optional[str] = None
     recommended_action: str = Field(min_length=1)
     reason_codes: list[str] = Field(default_factory=list)
-    explanation_facts: dict[str, str | float | int] = Field(default_factory=dict)
-    spaced_repetition: SpacedRepetitionPlan | None = None
+    explanation_facts: dict[str, Union[str, float, int]] = Field(default_factory=dict)
+    spaced_repetition: Optional[SpacedRepetitionPlan] = None

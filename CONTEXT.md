@@ -29,7 +29,7 @@ Build and demo a working hackathon project by the deadline with clear ownership,
   - dashboard now includes tabs: Dashboard, Statistics, Assignments, Tests & Scores, Profile
   - student ID is no longer editable in dashboard UI; it is bound to authenticated user profile/session
   - visualized mastery bars, weak topics list, recommendations, and calendar planner
-  - API integration path to `GET /students/{id}/state`, `GET /students/{id}/insights`, and `GET /students/{id}/plan?days=7` (with deterministic fallback)
+  - API integration path to `GET /students/{id}/state`, `GET /students/{id}/insights`, and `GET /students/{id}/spaced-repetition` (optional fallback to `GET /students/{id}/plan?days=7`)
   - deterministic mock fallback when backend endpoints are unavailable
 - Backend v0 implementation is now present for core demo flow:
   - `app/api/routers` (`health`, `events`, `students`, `insights`)
@@ -90,6 +90,11 @@ We are building an AI-powered learning-state engine that:
 - `GET /students/{id}/assignments?status=pending|done`: assignment tabs.
 - `GET /students/{id}/tests`: recent test list.
 - `GET /students/{id}/tests/summary`: aggregate score breakdown.
+
+Status update:
+- Implemented: statistics (`study-time`, `topic-accuracy`), assignments, tests, and tests summary endpoints in `app/api/routers/students.py`.
+- Frontend now syncs Statistics, Assignments, and Tests tabs against these endpoints, with deterministic fallback when unavailable.
+- Backend now auto-seeds demo learner records on startup (plus on-demand for `new_student_*` IDs) for presentation readiness, and frontend streak widgets consume backend streak metrics instead of hardcoded local values.
 
 ## Proposed Baseline Architecture
 - `frontend/`: web UI (screens, components, API clients)
@@ -168,5 +173,3 @@ Template:
 - Persistence is in-memory via `app/store/in_memory_store.py` keyed by `learner_id`.
 - Learning computation is centralized in `app/engine/state_engine.py` (single source of mastery updates).
 - Spaced-repetition behavior now includes explicit review scheduling in insights output (`spaced_repetition.review_queue`) with adaptive intervals based on mastery, confidence, and inactivity.
-
-

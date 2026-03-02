@@ -49,6 +49,11 @@ See `docs/PROJECT_STRUCTURE.md` for the full folder tree and ownership rules.
    - `python3 -m http.server 5500`
    - Open `http://localhost:5500/login.html`
 
+Demo data behavior:
+- Backend auto-seeds demo learners on startup (including `new_student_001`, `student-001`, `demo-learner`) so dashboard tabs have presentable data immediately.
+- If a `new_student_*` learner ID is requested and missing, backend seeds that learner on-demand for demo continuity.
+- Streak values now come from backend study-time stats (`current_streak_days`, `longest_streak_days`), not frontend hardcoded values.
+
 Frontend currently reads:
 - `GET /students/{id}/state`
 - `GET /students/{id}/insights`
@@ -72,7 +77,7 @@ Frontend tabs (UI shell ready):
 - Assignments
 - Tests & Scores
 - Profile
-- Statistics/Assignments/Tests tabs currently use placeholder cards and expected backend endpoint notes.
+- Statistics/Assignments/Tests tabs now call backend sync endpoints when available, with graceful fallback UI.
 - Dashboard no longer exposes editable student ID; student context is taken from logged-in session/profile.
 
 ## Current API Contract
@@ -80,6 +85,11 @@ Frontend tabs (UI shell ready):
 - `GET /students/{id}/state` returns decayed-on-read `StudentStateResponse`.
 - `GET /students/{id}/insights` returns explainable guidance plus a frontend-ready `spaced_repetition` plan (due-now count, next-24h count, ordered review queue).
 - `GET /students/{id}/spaced-repetition` returns only the spaced repetition plan for simpler frontend wiring.
+- `GET /students/{id}/statistics/study-time` returns session count + total study minutes + recent daily distribution.
+- `GET /students/{id}/statistics/topic-accuracy` returns topic-wise accuracy and attempts.
+- `GET /students/{id}/assignments?status=all|pending|done` returns assignment list with status/accuracy.
+- `GET /students/{id}/tests` returns test history snapshots.
+- `GET /students/{id}/tests/summary` returns aggregate score metrics.
 
 ## Spaced Repetition Status
 - Implemented with explicit scheduling on `GET /students/{id}/insights` via `spaced_repetition.review_queue`.

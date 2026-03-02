@@ -71,9 +71,33 @@ h2 {
   font-weight: 700;
 }
 
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.06rem;
+}
+
+.brand-wordmark {
+  letter-spacing: 0.15em;
+  font-size: 0.92rem;
+}
+
+.brand-tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
 .muted {
   color: var(--muted);
   margin: 0.4rem 0 0;
+}
+
+.sync-note {
+  padding-left: 0;
+  margin-left: 0.32rem;
 }
 
 .hidden {
@@ -242,6 +266,19 @@ h2 {
   gap: 1rem;
 }
 
+.dashboard-brand-title {
+  margin: 0;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.dashboard-brand-subtitle {
+  margin: 0.15rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
 .controls-wrap {
   display: flex;
   align-items: center;
@@ -341,7 +378,10 @@ h2 {
   box-shadow: 0 14px 28px rgba(24, 35, 34, 0.12);
 }
 
-.summary-card,
+.recommendation-tall {
+  grid-row: span 2;
+}
+
 .full-width {
   grid-column: span 12;
 }
@@ -361,6 +401,10 @@ h2 {
   gap: 0.85rem;
 }
 
+.summary-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .metric-label {
   margin: 0;
   color: var(--muted);
@@ -371,6 +415,11 @@ h2 {
   margin: 0.2rem 0 0;
   font-size: 1.68rem;
   font-weight: 700;
+}
+
+.metric-value-small {
+  font-size: 1.02rem;
+  margin-top: 0.5rem;
 }
 
 .profile-value {
@@ -764,8 +813,16 @@ body.modal-open {
     grid-column: span 12;
   }
 
+  .recommendation-tall {
+    grid-row: auto;
+  }
+
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+
+  .summary-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .bar-item {

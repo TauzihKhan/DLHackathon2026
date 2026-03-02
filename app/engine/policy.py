@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Optional
 
 from app.schemas.state import StudentStateResponse, SubtopicState
 
@@ -12,7 +13,7 @@ LOW_CONFIDENCE_THRESHOLD = 0.35
 @dataclass(frozen=True)
 class PolicyDecision:
     weak_subtopics: list[str]
-    priority_subtopic_id: str | None
+    priority_subtopic_id: Optional[str]
     recommended_action: str
     reason_codes: list[str]
 
@@ -49,7 +50,7 @@ def _reason_codes_for_subtopic(subtopic: SubtopicState) -> list[str]:
     return codes
 
 
-def _recommended_action(subtopic: SubtopicState | None, reason_codes: list[str]) -> str:
+def _recommended_action(subtopic: Optional[SubtopicState], reason_codes: list[str]) -> str:
     if subtopic is None:
         return "Continue regular practice to build baseline evidence across topics."
 

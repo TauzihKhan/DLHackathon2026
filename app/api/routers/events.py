@@ -11,5 +11,6 @@ router = APIRouter(tags=["events"])
 def post_event(event: LearningEvent) -> dict[str, str]:
     prev_state = store.get(event.learner_id)
     next_state = update_state(event, prev_state)
+    store.append_event(event)
     store.save(next_state)
     return {"status": "ok"}

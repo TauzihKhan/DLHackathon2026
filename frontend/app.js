@@ -1,4 +1,22 @@
-const API_BASE_URL = window.localStorage.getItem('apiBase') || 'http://localhost:8000';
+const configuredApiBase = (window.localStorage.getItem('apiBase') || '').trim().replace(/\/+$/, '');
+const DEFAULT_API_BASES = ['http://localhost:8000', 'http://127.0.0.1:8000'];
+
+function getApiBaseCandidates() {
+  const hostBasedUrl = window.location.hostname
+    ? `http://${window.location.hostname}:8000`
+    : '';
+
+  return Array.from(
+    new Set(
+      [configuredApiBase, hostBasedUrl, ...DEFAULT_API_BASES]
+        .map((value) => String(value || '').trim().replace(/\/+$/, ''))
+        .filter(Boolean)
+    )
+  );
+}
+
+const API_BASE_CANDIDATES = getApiBaseCandidates();
+let activeApiBase = API_BASE_CANDIDATES[0] || 'http://localhost:8000';
 
 const STORAGE_KEYS = {
   users: 'dlh_users',
@@ -15,6 +33,10 @@ const charts = {
 const calendarState = {
   visibleDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   selectedDateKey: null
+};
+
+const dashboardRuntime = {
+  studyTime: null
 };
 
 let calendarActionsBound = false;
@@ -39,7 +61,16 @@ const nodes = {
   practicePanel: document.getElementById('practicePanel'),
   youtubeQuery: document.getElementById('youtubeQuery'),
   youtubeSearchBtn: document.getElementById('youtubeSearchBtn'),
+  statisticsMeta: document.getElementById('statisticsMeta'),
   statsTableBody: document.getElementById('statsTableBody'),
+  assignmentsMeta: document.getElementById('assignmentsMeta'),
+  assignmentsTableBody: document.getElementById('assignmentsTableBody'),
+  testsMeta: document.getElementById('testsMeta'),
+  testsTableBody: document.getElementById('testsTableBody'),
+  testsTotalValue: document.getElementById('testsTotalValue'),
+  testsAverageValue: document.getElementById('testsAverageValue'),
+  testsBestValue: document.getElementById('testsBestValue'),
+  testsWeakestValue: document.getElementById('testsWeakestValue'),
   masteryTrendChart: document.getElementById('masteryTrendChart'),
   riskDonutChart: document.getElementById('riskDonutChart'),
   topicComparisonChart: document.getElementById('topicComparisonChart'),
@@ -237,6 +268,17 @@ function normalizeInsight(insight) {
 }
 
 function normalizePlan(plan, topWeakTopicName) {
+  const queue = Array.isArray(plan?.review_queue) ? plan.review_queue : [];
+  if (queue.length) {
+    const topReview = queue[0];
+    const topic = topReview?.topic_id || topWeakTopicName || 'core weak topic';
+    return [
+      `Warmup review: ${topic} flash recap`,
+      `Due now: ${Math.max(1, Number(plan?.due_now_count || 1))} review item(s)`,
+      `Practice next: ${topReview?.subtopic_id || topic} to reinforce retention`
+    ];
+  }
+
   const items = Array.isArray(plan?.roadmap)
     ? plan.roadmap
     : Array.isArray(plan?.items)
@@ -305,24 +347,40 @@ function recommendationMeta(summary, insight) {
   return { topWeakTopic: topWeak, bullets: bullets.slice(0, 3), evidence };
 }
 
-function computeDemoStreak(studentId = '') {
-  const numeric = Array.from(studentId).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  return 3 + (numeric % 11);
+function streakFromStudyTime(studyTime, summary) {
+  const fallbackCurrent =
+    summary && Array.isArray(summary.topics) && summary.topics.length && Number(summary.lastActivityDays) === 0 ? 1 : 0;
+  const current = Math.max(0, Number(studyTime?.current_streak_days ?? fallbackCurrent));
+  const longest = Math.max(current, Number(studyTime?.longest_streak_days ?? current));
+  const activeDays = Math.max(0, Number(studyTime?.active_days ?? 0));
+  const totalMinutes = Math.max(0, Number(studyTime?.total_minutes ?? 0));
+  return { current, longest, activeDays, totalMinutes };
 }
 
-function renderProfile(user) {
-  const streak = computeDemoStreak(user.studentId);
+function formatStudyTime(totalMinutes) {
+  const safeMinutes = Math.max(0, Number(totalMinutes ?? 0));
+  const hours = safeMinutes / 60;
+  if (hours >= 1) return `${hours.toFixed(1)} hours`;
+  return `${safeMinutes.toFixed(1)} minutes`;
+}
+
+function renderProfile(user, studyTime = null) {
+  const streak = streakFromStudyTime(studyTime, null);
   nodes.profileName.textContent = user.name || 'Learner';
   nodes.profileStudentId.textContent = user.studentId || 'new_student_001';
   nodes.profileEmail.textContent = user.email || '-';
   nodes.profileDob.textContent = user.dob || '-';
-  nodes.profileStreak.textContent = `${streak} days`;
-  nodes.profileStreakNote.textContent = 'Maintain daily practice above 15 minutes to keep streak growth stable.';
+  nodes.profileStreak.textContent = `${streak.current} days`;
+  nodes.profileStreakNote.textContent =
+    streak.current > 0
+      ? `Current streak ${streak.current} day(s). Longest streak ${streak.longest} day(s).`
+      : 'No active streak yet. Complete one learning activity to start your streak.';
 
   nodes.profileUpdates.innerHTML = [
     `Welcome ${user.name || 'Learner'}.`,
     `Student identity: ${user.studentId || 'new_student_001'}.`,
-    'Calendar tab now supports personal planning events.'
+    `Active learning days tracked: ${streak.activeDays}.`,
+    `Total tracked study time: ${formatStudyTime(streak.totalMinutes)}.`
   ]
     .map((item) => `<li>${item}</li>`)
     .join('');
@@ -348,6 +406,198 @@ function renderStatisticsTable(summary) {
     .join('');
 }
 
+function renderStatisticsFromEndpoint(payload) {
+  const topics = Array.isArray(payload?.topics) ? payload.topics : [];
+  if (!topics.length) return false;
+
+  nodes.statsTableBody.innerHTML = topics
+    .map((topic) => {
+      const accuracyPercent = Number(topic.accuracy_percent ?? (Number(topic.accuracy || 0) * 100));
+      const status = topicLabel(accuracyPercent);
+      return `
+      <tr>
+        <td>${topic.topic_id}</td>
+        <td>${accuracyPercent.toFixed(1)}% (${status})</td>
+        <td>Attempts: ${topic.attempts ?? 0}</td>
+        <td>Accuracy</td>
+      </tr>
+    `;
+    })
+    .join('');
+  return true;
+}
+
+async function syncStatistics(learnerId, summary, user) {
+  if (!nodes.statisticsMeta) return;
+
+  try {
+    const [topicAccuracy, studyTime] = await Promise.all([
+      fetchJson(`/students/${learnerId}/statistics/topic-accuracy`),
+      fetchJson(`/students/${learnerId}/statistics/study-time`)
+    ]);
+
+    const rendered = renderStatisticsFromEndpoint(topicAccuracy);
+    if (!rendered) renderStatisticsTable(summary);
+
+    dashboardRuntime.studyTime = studyTime;
+    renderStudyStreak(summary, studyTime);
+    renderProfile(user, studyTime);
+
+    const totalMinutes = Number(studyTime?.total_minutes ?? 0);
+    const sessions = Number(studyTime?.session_count ?? 0);
+    nodes.statisticsMeta.textContent = `Statistics synced • Study time: ${formatStudyTime(totalMinutes)} • Sessions: ${sessions}`;
+  } catch (err) {
+    dashboardRuntime.studyTime = null;
+    renderStudyStreak(summary, null);
+    renderProfile(user, null);
+    renderStatisticsTable(summary);
+    nodes.statisticsMeta.textContent = 'Statistics unavailable right now. Showing state-derived table.';
+  }
+}
+
+function formatDate(isoLike) {
+  if (!isoLike) return '-';
+  const date = new Date(isoLike);
+  if (Number.isNaN(date.getTime())) return String(isoLike);
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+function renderAssignmentsTab(payload, sourceLabel) {
+  if (!nodes.assignmentsTableBody || !nodes.assignmentsMeta) return;
+
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  nodes.assignmentsMeta.textContent = sourceLabel;
+
+  if (!items.length) {
+    nodes.assignmentsTableBody.innerHTML =
+      '<tr><td colspan="5" class="muted">No assignments yet. Assignment attempts will appear here.</td></tr>';
+    return;
+  }
+
+  nodes.assignmentsTableBody.innerHTML = items
+    .map(
+      (item) => `
+      <tr>
+        <td>${item.title || '-'}</td>
+        <td>${item.status || '-'}</td>
+        <td>${item.attempts ?? 0}</td>
+        <td>${Number(item.accuracy_percent ?? 0).toFixed(1)}%</td>
+        <td>${item.due_date ? formatDate(item.due_date) : '-'}</td>
+      </tr>
+    `
+    )
+    .join('');
+}
+
+function renderTestsTab(testsPayload, summaryPayload, sourceLabel) {
+  if (!nodes.testsTableBody || !nodes.testsMeta) return;
+
+  const items = Array.isArray(testsPayload?.items) ? testsPayload.items : [];
+  const totalTests = Number(summaryPayload?.total_tests ?? items.length ?? 0);
+  const averageScore = Number(summaryPayload?.average_score ?? 0);
+  const bestScore = Number(summaryPayload?.best_score ?? 0);
+  const weakestTopic = summaryPayload?.weakest_topic || '-';
+
+  nodes.testsTotalValue.textContent = String(totalTests);
+  nodes.testsAverageValue.textContent = `${averageScore.toFixed(1)}%`;
+  nodes.testsBestValue.textContent = `${bestScore.toFixed(1)}%`;
+  nodes.testsWeakestValue.textContent = weakestTopic;
+  nodes.testsMeta.textContent = sourceLabel;
+
+  if (!items.length) {
+    nodes.testsTableBody.innerHTML =
+      '<tr><td colspan="5" class="muted">No tests yet. Quiz attempts will appear here.</td></tr>';
+    return;
+  }
+
+  nodes.testsTableBody.innerHTML = items
+    .map(
+      (item) => `
+      <tr>
+        <td>${item.test_name || 'Test'}</td>
+        <td>${formatDate(item.taken_on)}</td>
+        <td>${Number(item.score_percent ?? 0).toFixed(1)}%</td>
+        <td>${item.attempts ?? 0}</td>
+        <td>${item.topic_count ?? '-'}</td>
+      </tr>
+    `
+    )
+    .join('');
+}
+
+function fallbackAssignmentsFromSummary(summary) {
+  const topics = summary.topics.slice().sort((a, b) => a.mastery - b.mastery).slice(0, 4);
+  return {
+    items: topics.map((topic, idx) => ({
+      title: `${topic.name}: targeted practice`,
+      status: topic.mastery >= 70 ? 'done' : 'pending',
+      attempts: 0,
+      accuracy_percent: topic.mastery,
+      due_date: topic.mastery >= 70 ? null : new Date(Date.now() + (idx + 1) * 86400000).toISOString()
+    }))
+  };
+}
+
+function fallbackTestsFromSummary(summary) {
+  const averageMastery = summary.topics.length
+    ? summary.topics.reduce((acc, topic) => acc + Number(topic.mastery || 0), 0) / summary.topics.length
+    : 0;
+  const weakestTopic = summary.topics.length
+    ? summary.topics.slice().sort((a, b) => a.mastery - b.mastery)[0].name
+    : '-';
+  return {
+    tests: {
+      items: [
+        {
+          test_name: 'Mastery Snapshot',
+          taken_on: new Date().toISOString(),
+          score_percent: Number(averageMastery.toFixed(1)),
+          attempts: summary.topics.length,
+          topic_count: summary.topics.length
+        }
+      ]
+    },
+    summary: {
+      total_tests: 1,
+      average_score: Number(averageMastery.toFixed(1)),
+      best_score: Number(averageMastery.toFixed(1)),
+      weakest_topic: weakestTopic
+    }
+  };
+}
+
+async function syncAssignmentsAndTests(learnerId, summary) {
+  let assignmentsPayload;
+  let assignmentsSource;
+
+  try {
+    assignmentsPayload = await fetchJson(`/students/${learnerId}/assignments?status=all`);
+    assignmentsSource = 'Assignments synced.';
+  } catch (err) {
+    assignmentsPayload = fallbackAssignmentsFromSummary(summary);
+    assignmentsSource = 'Assignments unavailable right now. Showing fallback list.';
+  }
+  renderAssignmentsTab(assignmentsPayload, assignmentsSource);
+
+  let testsPayload;
+  let testsSummaryPayload;
+  let testsSource;
+
+  try {
+    [testsPayload, testsSummaryPayload] = await Promise.all([
+      fetchJson(`/students/${learnerId}/tests`),
+      fetchJson(`/students/${learnerId}/tests/summary`)
+    ]);
+    testsSource = 'Tests synced.';
+  } catch (err) {
+    const fallback = fallbackTestsFromSummary(summary);
+    testsPayload = fallback.tests;
+    testsSummaryPayload = fallback.summary;
+    testsSource = 'Tests unavailable right now. Showing fallback summary.';
+  }
+  renderTestsTab(testsPayload, testsSummaryPayload, testsSource);
+}
+
 function animateMasteryBars() {
   const fills = nodes.masteryChart.querySelectorAll('.bar-fill');
   fills.forEach((fill) => {
@@ -359,11 +609,10 @@ function animateMasteryBars() {
   });
 }
 
-function renderStudyStreak(summary, user) {
-  const current = Math.max(1, computeDemoStreak(user.studentId) - Math.min(2, summary.lastActivityDays));
-  const longest = current + 6;
-  nodes.streakCurrent.textContent = `${current} days`;
-  nodes.streakLongest.textContent = `Longest streak: ${longest} days`;
+function renderStudyStreak(summary, studyTime = null) {
+  const streak = streakFromStudyTime(studyTime, summary);
+  nodes.streakCurrent.textContent = `${streak.current} days`;
+  nodes.streakLongest.textContent = `Longest streak: ${streak.longest} days`;
 }
 
 function renderFocusPlan(planItems) {
@@ -394,6 +643,10 @@ function last7DateLabels() {
 }
 
 function trendSeriesForTopic(topicName, mastery) {
+  if (Number(mastery) <= 0) {
+    return Array.from({ length: 7 }, () => 0);
+  }
+
   const seed = Array.from(topicName).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   return Array.from({ length: 7 }, (_, idx) => {
     const drift = (idx - 3) * 1.2;
@@ -407,6 +660,9 @@ function renderCharts(summary) {
   if (typeof window.Chart === 'undefined') return;
 
   const labels = last7DateLabels();
+  const averageMastery = summary.topics.length
+    ? Math.round(summary.topics.reduce((acc, topic) => acc + Number(topic.mastery || 0), 0) / summary.topics.length)
+    : 0;
   const colorMap = {
     'Algebra': '#007a78',
     'Geometry': '#22a19f',
@@ -417,10 +673,10 @@ function renderCharts(summary) {
   const orderedTopics = ['Algebra', 'Geometry', 'Trigonometry identities', 'Calculus limits'];
   const datasets = orderedTopics
     .map((name) => {
-      const topic = summary.topics.find((t) => t.name === name) || { mastery: 55 };
+      const topic = summary.topics.find((t) => t.name === name);
       return {
         label: name,
-        data: trendSeriesForTopic(name, topic.mastery),
+        data: trendSeriesForTopic(name, topic ? topic.mastery : averageMastery),
         borderColor: colorMap[name],
         backgroundColor: 'transparent',
         pointRadius: 2,
@@ -678,44 +934,178 @@ function render(state, insight, planItems, source, user) {
   nodes.youtubeQuery.value = ytTopic;
 
   renderStatisticsTable(summary);
-  renderStudyStreak(summary, user);
+  renderStudyStreak(summary, dashboardRuntime.studyTime);
   renderFocusPlan(planItems);
   renderCharts(summary);
 
-  nodes.sourceNote.textContent = source;
+  if (nodes.sourceNote) nodes.sourceNote.textContent = source;
+}
+
+async function requestJson(url, options = {}) {
+  const method = options.method || 'GET';
+  const body = options.body;
+  const isAbsolute = /^https?:\/\//i.test(url);
+  const requestUrls = isAbsolute
+    ? [url]
+    : API_BASE_CANDIDATES.map((base) => `${base}${url.startsWith('/') ? url : `/${url}`}`);
+
+  let lastError = new Error('No API base candidates configured.');
+
+  for (const requestUrl of requestUrls) {
+    try {
+      const headers = { Accept: 'application/json' };
+      if (body !== undefined) headers['Content-Type'] = 'application/json';
+
+      const res = await fetch(requestUrl, {
+        method,
+        headers,
+        body: body !== undefined ? JSON.stringify(body) : undefined
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const matchedBase = API_BASE_CANDIDATES.find((base) => requestUrl.startsWith(base));
+      if (matchedBase) activeApiBase = matchedBase;
+      if (res.status === 204) return null;
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) return null;
+      return res.json();
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+    }
+  }
+
+  throw lastError;
 }
 
 async function fetchJson(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json();
+  return requestJson(url, { method: 'GET' });
+}
+
+function learnerIdCandidates(studentId, user) {
+  const requested = String(studentId || '').trim();
+  const sessionId = String(user?.studentId || '').trim();
+  const manualPreferred = String(window.localStorage.getItem('preferredLearnerId') || '').trim();
+  const candidates = Array.from(new Set([requested, sessionId, manualPreferred].filter(Boolean)));
+  return candidates.length ? candidates : ['student-001'];
 }
 
 async function loadDashboard(studentId, user) {
-  const safeStudentId = studentId || 'student-001';
+  const idsToTry = learnerIdCandidates(studentId, user);
+  let lastError = new Error('No learner ID candidates to try.');
+  let sawOnlyNotFound = idsToTry.length > 0;
 
-  try {
-    const [rawState, rawInsight, rawPlan] = await Promise.all([
-      fetchJson(`${API_BASE_URL}/students/${safeStudentId}/state`),
-      fetchJson(`${API_BASE_URL}/students/${safeStudentId}/insights`),
-      fetchJson(`${API_BASE_URL}/students/${safeStudentId}/plan?days=7`)
-    ]);
+  for (const learnerId of idsToTry) {
+    try {
+      const [rawState, rawInsight] = await Promise.all([
+        fetchJson(`/students/${learnerId}/state`),
+        fetchJson(`/students/${learnerId}/insights`)
+      ]);
 
-    const state = normalizeState(rawState);
-    const insight = normalizeInsight(rawInsight);
-    const summary = computeSummary(state);
-    const topWeak = summary.weakTopics[0]?.name;
-    const planItems = normalizePlan(rawPlan, topWeak);
-    render(state, insight, planItems, `Using backend data from ${API_BASE_URL} for ${safeStudentId}.`, user);
-    updateLastUpdated();
-  } catch (err) {
-    const state = normalizeState(mockState);
-    const insight = normalizeInsight(mockInsight);
-    const summary = computeSummary(state);
-    const topWeak = summary.weakTopics[0]?.name;
-    const planItems = normalizePlan(mockPlan, topWeak);
-    render(state, insight, planItems, `Backend unavailable (${err.message}). Showing deterministic mock data.`, user);
+      const state = normalizeState(rawState);
+      const insight = normalizeInsight(rawInsight);
+      const summary = computeSummary(state);
+      const topWeak = summary.weakTopics[0]?.name;
+      let sourceDetails = ['state', 'insights'];
+      let rawPlan = rawInsight?.spaced_repetition || null;
+
+      try {
+        rawPlan = await fetchJson(`/students/${learnerId}/spaced-repetition`);
+        sourceDetails.push('spaced-repetition');
+      } catch (spacedErr) {
+        // Keep `insights.spaced_repetition` if available, otherwise try `/plan`.
+      }
+
+      try {
+        if (!rawPlan) {
+          rawPlan = await fetchJson(`/students/${learnerId}/plan?days=7`);
+          sourceDetails.push('plan');
+        }
+      } catch (planErr) {
+        // Keep deterministic fallback if both backend plan shapes are unavailable.
+      }
+
+      const planItems = normalizePlan(rawPlan, topWeak);
+      const source = `Live sync active for ${learnerId}.`;
+      dashboardRuntime.studyTime = null;
+      render(state, insight, planItems, source, user);
+      await syncStatistics(learnerId, summary, user);
+      await syncAssignmentsAndTests(learnerId, summary);
+      updateLastUpdated();
+      return;
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (/HTTP 404/.test(String(lastError.message || ''))) {
+        continue;
+      }
+      sawOnlyNotFound = false;
+      break;
+    }
   }
+
+  if (sawOnlyNotFound && idsToTry.length) {
+    const requested = idsToTry[0];
+    const emptyState = { student_id: requested, total_xp: 0, topics: [] };
+    const emptyInsight = {
+      recommendation: 'No activity data yet. Start with one quiz or assignment attempt to generate insights.',
+      reasonCodes: ['NO_DATA'],
+      weakSubtopics: []
+    };
+    const planItems = [
+      'Warmup review: pick one chapter',
+      'Complete 1 short practice set',
+      'Return to dashboard to see updated insights'
+    ];
+    dashboardRuntime.studyTime = null;
+    render(
+      emptyState,
+      emptyInsight,
+      planItems,
+      `No learner activity found yet for: ${idsToTry.join(', ')}.`,
+      user
+    );
+    if (nodes.statisticsMeta) {
+      nodes.statisticsMeta.textContent = `No statistics found yet for learner ${requested}.`;
+    }
+    renderAssignmentsTab(
+      { items: [] },
+      `No assignments found yet for learner ${requested}.`
+    );
+    renderTestsTab(
+      { items: [] },
+      { total_tests: 0, average_score: 0, best_score: 0, weakest_topic: '-' },
+      `No tests found yet for learner ${requested}.`
+    );
+    updateLastUpdated();
+    return;
+  }
+
+  const state = normalizeState(mockState);
+  const insight = normalizeInsight(mockInsight);
+  const summary = computeSummary(state);
+  const topWeak = summary.weakTopics[0]?.name;
+  const planItems = normalizePlan(mockPlan, topWeak);
+  dashboardRuntime.studyTime = null;
+  render(
+    state,
+    insight,
+    planItems,
+    'Live sync unavailable. Showing demo data.',
+    user
+  );
+  if (nodes.statisticsMeta) {
+    nodes.statisticsMeta.textContent = 'Statistics unavailable right now. Showing state-derived statistics.';
+  }
+  renderAssignmentsTab(
+    fallbackAssignmentsFromSummary(summary),
+    'Assignments unavailable right now. Showing fallback list.'
+  );
+  const testsFallback = fallbackTestsFromSummary(summary);
+  renderTestsTab(
+    testsFallback.tests,
+    testsFallback.summary,
+    'Tests unavailable right now. Showing fallback summary.'
+  );
+  updateLastUpdated();
 }
 
 async function revealDashboard() {

@@ -74,6 +74,18 @@ Purpose: keep both backend branches aligned while two people implement Role 1 in
   - `due_next_24h_count: int`
   - `review_queue: list[{ module_id, topic_id, subtopic_id, interval_days, due_in_days, due_now, next_review_at, priority_score }]`
 
+### Additive UI Sync Endpoints
+- `GET /students/{id}/statistics/study-time`
+  - `total_minutes`, `session_count`, `last_7_days`, `by_event_type`, `active_days`, `current_streak_days`, `longest_streak_days`
+- `GET /students/{id}/statistics/topic-accuracy`
+  - topic-level `attempts`, `correct_attempts`, `accuracy`, `accuracy_percent`
+- `GET /students/{id}/assignments?status=all|pending|done`
+  - assignment list (`title`, `status`, `attempts`, `accuracy_percent`, `due_date`)
+- `GET /students/{id}/tests`
+  - test history list (`test_name`, `taken_on`, `score_percent`, `attempts`)
+- `GET /students/{id}/tests/summary`
+  - aggregate test metrics (`total_tests`, `average_score`, `best_score`, `latest_score`, `weakest_topic`)
+
 ## Locked Metric Semantics (v0)
 - `mastery`: estimated knowledge level per subtopic in `[0, 1]`.
 - `confidence`: stability of estimate in `[0, 1]`; increases with evidence.

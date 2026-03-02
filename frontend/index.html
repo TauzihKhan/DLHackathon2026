@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Learner State Dashboard</title>
+    <title>NOVA | Learner Intelligence Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -15,7 +15,10 @@
 
     <div id="entrySplash" class="entry-splash">
       <div class="entry-card">
-        <p class="eyebrow">Learner Portal</p>
+        <div class="brand-lockup">
+          <p class="eyebrow brand-wordmark">NOVA</p>
+          <p class="brand-tagline">Your AI Learning Hub</p>
+        </div>
         <h2>Preparing Your Dashboard</h2>
         <div class="entry-spinner" aria-hidden="true"></div>
       </div>
@@ -24,8 +27,8 @@
     <div id="dashboardApp" class="dashboard-app dashboard-hidden">
       <header class="topbar">
         <div>
-          <p class="eyebrow">Learner Portal</p>
-          <h1>Learner Intelligence Dashboard</h1>
+          <h1 class="dashboard-brand-title">NOVA</h1>
+          <p class="dashboard-brand-subtitle">Your AI Learning Hub</p>
         </div>
         <div class="controls-wrap">
           <div class="status-strip">
@@ -41,14 +44,14 @@
         <button class="page-tab" data-tab="statistics" type="button">Statistics</button>
         <button class="page-tab" data-tab="assignments" type="button">Assignments</button>
         <button class="page-tab" data-tab="tests" type="button">Tests &amp; Scores</button>
-        <button class="page-tab" data-tab="profile" type="button">Profile</button>
         <button class="page-tab" data-tab="calendar" type="button">Calendar</button>
+        <button class="page-tab" data-tab="profile" type="button">Profile</button>
       </nav>
 
       <main>
         <section class="tab-panel" data-panel="dashboard">
           <div class="layout">
-            <section class="card summary-card">
+            <section class="card summary-card span-8">
               <h2>Overall Progress</h2>
               <div class="summary-grid">
                 <article>
@@ -64,6 +67,12 @@
                   <p id="riskValue" class="metric-value danger">-</p>
                 </article>
               </div>
+            </section>
+
+            <section class="card span-4">
+              <h2>Study Streak</h2>
+              <p id="streakCurrent" class="metric-value">0 days</p>
+              <p id="streakLongest" class="muted">Longest streak: 0 days</p>
             </section>
 
             <section class="card span-8">
@@ -92,7 +101,7 @@
               <ul id="weakTopicsList" class="list"></ul>
             </section>
 
-            <section id="recommendationCard" class="card">
+            <section id="recommendationCard" class="card recommendation-tall">
               <h2>Next Recommendation</h2>
               <div id="recommendation" class="recommendation">
                 <p id="recommendationText"><strong>No recommendation yet.</strong></p>
@@ -115,12 +124,6 @@
             </section>
 
             <section class="card">
-              <h2>Study Streak</h2>
-              <p id="streakCurrent" class="metric-value">0 days</p>
-              <p id="streakLongest" class="muted">Longest streak: 0 days</p>
-            </section>
-
-            <section class="card">
               <h2>Focus Plan for Today</h2>
               <div id="focusPlan" class="checklist"></div>
             </section>
@@ -129,11 +132,6 @@
               <h2>Mastery by Topic</h2>
               <div id="masteryChart" class="bars"></div>
             </section>
-
-            <section class="card full-width">
-              <h2>Data Source</h2>
-              <p id="sourceNote" class="muted"></p>
-            </section>
           </div>
         </section>
 
@@ -141,7 +139,6 @@
           <div class="layout">
             <section class="card full-width">
               <h2>Statistics</h2>
-              <p class="muted">Topic-level mastery and activity summary.</p>
               <div class="stats-table-wrap">
                 <table class="stats-table">
                   <thead>
@@ -159,6 +156,7 @@
                   </tbody>
                 </table>
               </div>
+              <p id="statisticsMeta" class="muted sync-note">Loading statistics sync...</p>
             </section>
           </div>
         </section>
@@ -167,7 +165,25 @@
           <div class="layout">
             <section class="card full-width">
               <h2>Assignments</h2>
-              <p class="muted">Placeholder UI: pending assignments, due dates, and recommendation-linked tasks.</p>
+              <div class="stats-table-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Status</th>
+                      <th>Attempts</th>
+                      <th>Accuracy</th>
+                      <th>Due</th>
+                    </tr>
+                  </thead>
+                  <tbody id="assignmentsTableBody">
+                    <tr>
+                      <td colspan="5" class="muted">No assignment data yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="assignmentsMeta" class="muted sync-note">Loading assignment sync...</p>
             </section>
           </div>
         </section>
@@ -176,7 +192,43 @@
           <div class="layout">
             <section class="card full-width">
               <h2>Tests &amp; Scores</h2>
-              <p class="muted">Placeholder UI: test history, scores, and weak-area mapping from assessments.</p>
+              <div class="summary-grid summary-grid-4">
+                <article>
+                  <p class="metric-label">Total tests</p>
+                  <p id="testsTotalValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Average score</p>
+                  <p id="testsAverageValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Best score</p>
+                  <p id="testsBestValue" class="metric-value">-</p>
+                </article>
+                <article>
+                  <p class="metric-label">Weakest topic</p>
+                  <p id="testsWeakestValue" class="metric-value metric-value-small">-</p>
+                </article>
+              </div>
+              <div class="stats-table-wrap">
+                <table class="stats-table">
+                  <thead>
+                    <tr>
+                      <th>Test</th>
+                      <th>Date</th>
+                      <th>Score</th>
+                      <th>Attempts</th>
+                      <th>Topics</th>
+                    </tr>
+                  </thead>
+                  <tbody id="testsTableBody">
+                    <tr>
+                      <td colspan="5" class="muted">No test records yet.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p id="testsMeta" class="muted sync-note">Loading tests sync...</p>
             </section>
           </div>
         </section>

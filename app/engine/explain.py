@@ -1,5 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
+from typing import Optional, Union
 from app.engine.policy import PolicyDecision
 from app.engine.spaced_repetition import build_spaced_repetition_plan
 from app.schemas.insight import InsightResponse
@@ -8,8 +9,8 @@ from app.schemas.state import StudentStateResponse, SubtopicState
 
 def _find_priority_subtopic(
     state: StudentStateResponse,
-    priority_subtopic_id: str | None,
-) -> SubtopicState | None:
+    priority_subtopic_id: Optional[str],
+) -> Optional[SubtopicState]:
     if priority_subtopic_id is None:
         return None
 
@@ -22,10 +23,10 @@ def _find_priority_subtopic(
 def build_explanation_facts(
     state: StudentStateResponse,
     decision: PolicyDecision,
-) -> dict[str, str | float | int]:
+) -> dict[str, Union[str, float, int]]:
     """Build structured evidence payload for explainable recommendations."""
 
-    facts: dict[str, str | float | int] = {
+    facts: dict[str, Union[str, float, int]] = {
         "xp_total": state.xp_total,
         "weak_subtopic_count": len(decision.weak_subtopics),
         "updated_at": state.updated_at.isoformat(),
