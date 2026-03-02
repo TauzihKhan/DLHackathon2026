@@ -6,6 +6,7 @@ Hackathon project repository for building and demoing an end-to-end product quic
 - Project context: `CONTEXT.md`
 - Agent workflow rules: `AGENTS.md`
 - Structure guide: `docs/PROJECT_STRUCTURE.md`
+- Backend collaboration contract: `docs/BACKEND_CONTRACT.md`
 
 ## Team Goal
 Ship a reliable demo before the deadline with clear scope and fast iteration.
