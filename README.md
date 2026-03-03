@@ -60,7 +60,7 @@ make dev
 ```
 - Thats it!
 
-### Manual method for the terminal bois
+### Manual method for the terminal
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
